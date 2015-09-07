@@ -268,6 +268,9 @@ class hr_payslip(osv.osv):
         'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True, states={'draft': [('readonly', False)]}),
         'date_from': fields.date('Date From', readonly=True, states={'draft': [('readonly', False)]}, required=True),
         'date_to': fields.date('Date To', readonly=True, states={'draft': [('readonly', False)]}, required=True),
+        'department_id': fields.many2one('hr.department', 'Department'),
+        'employee_no': fields.char(string="Employee No",related='employee_id.employee_no',store=True,compute='_compute_employee_no'),
+        'job_id': fields.many2one('hr.job', 'Job Title'),
         'state': fields.selection([
             ('draft', 'Draft'),
             ('verify', 'Waiting'),
@@ -300,13 +303,33 @@ class hr_payslip(osv.osv):
                     context=context).company_id.id,
     }
 
+
+    @api.one
+    @api.depends('employee_id.employee_no')
+    def _compute_employee_no(self):
+        if self.employee_id.employee_no:
+            self.employee_no = self.employee_id.employee_no
+        else:
+            self.employee_no = "XXXX"
+
+    @api.onchange('employee_id')
+    def _onchange_partner(self):
+        self.employee_no = self.employee_id.employee_no
+
     def _check_dates(self, cr, uid, ids, context=None):
         for payslip in self.browse(cr, uid, ids, context=context):
             if payslip.date_from > payslip.date_to:
                 return False
         return True
 
-    _constraints = [(_check_dates, "Payslip 'Date From' must be before 'Date To'.", ['date_from', 'date_to'])]
+    def _check_employee_no(self, cr, uid, ids, context=None):
+        for payslip in self.browse(cr, uid, ids, context=context):
+            if payslip.employee_no == payslip.employee_id.employee_no:
+                return True
+        return False
+
+    _constraints = [(_check_dates, "Payslip 'Date From' must be before 'Date To'.", ['date_from', 'date_to']),
+                    (_check_employee_no,"Payslip employee number should be same as in employee records",['employee_no','employee_id.employee_no'])]
 
     def cancel_sheet(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'cancel'}, context=context)

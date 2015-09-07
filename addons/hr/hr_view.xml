@@ -57,6 +57,15 @@
                                         <field name="user_id" on_change="onchange_user(user_id)" string="Related User"
                                             context="{'default_groups_ref': ['base.group_user']}"/>
                                     </group>
+                                    <group string="Billable" name="active_group">
+                                        <field name="billable"/>
+                                    </group>
+                                    <group string="DOJ">
+                                        <field name="doj"/>
+                                    </group>
+                                    <group string="Employee No.">
+                                        <field name="employee_no"/>
+                                    </group>
                                 </group>
                                 <field name="notes" placeholder="Other Information ..." colspan="4"/>
                             </page>

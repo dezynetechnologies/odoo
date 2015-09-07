@@ -95,7 +95,7 @@
                             <field name="name" string="Project Name"/>
                         </h1>
                         <div name="options_active">
-                            <field name="use_tasks" class="oe_inline"/>
+                            <field name="use_tasks" class="oe_inline" invisible="1"/>
                             <label for="use_tasks" string="Use Tasks"/>
                         </div>
                     </div>
@@ -115,6 +115,11 @@
                                     context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'project.group_project_manager']}"/>
                             <newline/>
                             <field name="partner_id" on_change="onchange_partner_id(partner_id)" string="Customer"/>
+			    <field name="sap_project_code"/>
+			    <field name="department_id"/>
+			    <field name="first_level"/>
+			    <field name="second_level"/>
+			    <field name="project_status"/>
                         </group>
                             <p attrs="{'invisible': [('analytic_account_id','=',False)]}">
                                 To invoice or setup invoicing and renewal options, go to the related contract:
@@ -157,6 +162,12 @@
                                 </kanban>
                             </field>
                         </page>
+			<page string="Sale Orders">
+			    <field name="sale_orders" widget="many2many_list" context="{'partner_id':partner_id}" domain="[('partner_id','=',partner_id)]"/>
+			</page>
+			<page string="Resource Allocation Sheet">
+			    <field name="resource_allocations" on_change="onchange_resource_allocations(resource_allocations)"/>
+			</page>
                         <page string="Other Info">
                             <group string="Administration">
                                 <field name="privacy_visibility" widget="radio"/>
@@ -334,6 +345,8 @@
                 </p>
             </field>
         </record>
+
+
 
         <record id="open_view_template_project" model="ir.actions.act_window">
             <field name="name">Templates of Projects</field>
@@ -718,6 +731,121 @@
             </field>
         </record>
 
+        <record id="billing_rate_tree" model="ir.ui.view">
+            <field name="name">project.billing.rate.tree</field>
+            <field name="model">project.billing.rate</field>
+            <field name="arch" type="xml">
+                <tree string="Billing Rate">
+                        <field name="name"/>
+                        <field name="role"/>
+                        <field name="rate" />
+                        <field name="currency_id" groups="base.group_multi_currency"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="open_billing_rates_all" model="ir.actions.act_window">
+            <field name="name">Billing Rates</field>
+            <field name="res_model">project.billing.rate</field>
+            <field name="view_type">form</field>
+            <!-- <field name="domain">[]</field> -->
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="billing_rate_tree"/>
+            <!-- <field name="search_view_id" ref="view_project_project_filter"/>
+            <field name="context">{'search_default_Current': 1}</field> -->
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                  Click to create a Billing Rate for a designated Project Role.
+                </p><p>
+                  Here you can define the mapping for Billing Rate to a Project Role.
+                </p>
+            </field>
+        </record>
+
+        <record id="project_expenses_tree" model="ir.ui.view">
+            <field name="name">project.expenses.tree</field>
+            <field name="model">project.expenses</field>
+            <field name="arch" type="xml">
+                <tree string="Project Expenses">
+                        <field name="name"/>
+                        <field name="category"/>
+                        <field name="date_from" />
+                        <field name="date_to"/>
+                        <field name="amount"/>
+                        <field name="currency_id" groups="base.group_multi_currency"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="open_project_expenses_all" model="ir.actions.act_window">
+            <field name="name">Project Expenses</field>
+            <field name="res_model">project.expenses</field>
+            <field name="view_type">form</field>
+            <!-- <field name="domain">[]</field> -->
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="project_expenses_tree"/>
+            <!-- <field name="search_view_id" ref="view_project_project_filter"/>
+            <field name="context">{'search_default_Current': 1}</field> -->
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                  Click to create Project Expenses.
+                </p><p>
+                  Here you can create project expenses amortised at the level of a resource.
+                </p>
+            </field>
+        </record>
+
+       <record id="project_billing_rate_card_tree" model="ir.ui.view">
+            <field name="name">project.billing.rate.card.tree</field>
+            <field name="model">project.billing.rate.card</field>
+            <field name="arch" type="xml">
+                <tree string="Project Billing Rate Card">
+                        <field name="name" colspan="4"/>
+                </tree>
+            </field>
+        </record>
+
+       <record id="project_billing_rate_card_form" model="ir.ui.view">
+            <field name="name">project.billing.rate.card.tree</field>
+            <field name="model">project.billing.rate.card</field>
+            <field name="arch" type="xml">
+                <form string="Project Billing Rate Card">
+                    <group col="4">
+                        <field name="name" colspan="4"/>
+                    </group>
+                    <notebook>
+                    <page string="Billing Table">
+                        <field name="billing_table"/>
+                    </page>
+                    <page string="Projects">
+                        <field name="project_ids"/>
+                    </page>
+                    </notebook>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="open_project_billing_rate_cards_all" model="ir.actions.act_window">
+            <field name="name">Project Billing Rate Cards</field>
+            <field name="res_model">project.billing.rate.card</field>
+            <field name="view_type">form</field>
+            <!-- <field name="domain">[]</field> -->
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="project_billing_rate_card_tree"/>
+            <!-- <field name="search_view_id" ref="view_project_project_filter"/>
+            <field name="context">{'search_default_Current': 1}</field> -->
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                  Click to create Project Billing Rate Card.
+                </p><p>
+                  Here you can create project billing rate card.
+                </p>
+            </field>
+        </record>
+
         <record id="open_task_type_form" model="ir.actions.act_window">
             <field name="name">Stages</field>
             <field name="res_model">project.task.type</field>
@@ -742,6 +870,11 @@
         <menuitem action="open_task_type_form" name="Task Stages" id="menu_task_types_view" parent="base.menu_project_config_project" sequence="2"/>
         <menuitem action="open_view_project_all" id="menu_projects" name="Projects" parent="menu_project_management" sequence="1"/>
 
+        <menuitem action="open_project_expenses_all" id="menu_project_expenses" name="Project Expenses" parent="menu_project_management" sequence="3"/>
+
+        <menuitem action="open_project_billing_rate_cards_all" id="menu_billing_cards" name="Billing Rate Cards" parent="menu_project_management" sequence="4"/>
+
+        <menuitem action="open_billing_rates_all" id="menu_billing_rate" name="Billing Rates" parent="menu_project_management" sequence="5"/>
 
          <record id="task_company" model="ir.ui.view">
             <field name="name">res.company.task.config</field>

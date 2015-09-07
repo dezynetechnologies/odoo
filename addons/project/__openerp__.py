@@ -34,7 +34,8 @@
         'board',
         'mail',
         'resource',
-        'web_kanban'
+        'web_kanban',
+        'sale'
     ],
     'description': """
 Track multi-level projects, tasks, work done on tasks

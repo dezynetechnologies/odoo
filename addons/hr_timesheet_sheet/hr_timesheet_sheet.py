@@ -21,6 +21,7 @@
 
 import time
 from datetime import datetime
+from datetime import date
 from dateutil.relativedelta import relativedelta
 from pytz import timezone
 import pytz
@@ -62,10 +63,24 @@ class hr_timesheet_sheet(osv.osv):
             raise osv.except_osv(('Warning!'),_('The timesheet cannot be validated as it does not contain an equal number of sign ins and sign outs.'))
         return True
 
-    def copy(self, cr, uid, ids, *args, **argv):
-        raise osv.except_osv(_('Error!'), _('You cannot duplicate a timesheet.'))
+    #def copy(self, cr, uid, ids, *args, **argv):
+    #    raise osv.except_osv(_('Error!'), _('You cannot duplicate a timesheet.'))
+
+    def copy(self, cr, uid, id, default=None, context=None):
+        if context is None:
+            context={}
+
+        if default is None:
+            default = {}
+
+        timesheet = self.browse(cr, uid, id, context)
+        default['name'] = _("%s (copy)") % (timesheet.name,)
+
+        return super(hr_timesheet_sheet, self).copy(cr, uid, id, default=default, context=context)
+
 
     def create(self, cr, uid, vals, context=None):
+        print vals
         if 'employee_id' in vals:
             if not self.pool.get('hr.employee').browse(cr, uid, vals['employee_id'], context=context).user_id:
                 raise osv.except_osv(_('Error!'), _('In order to create a timesheet for this employee, you must link him/her to a user.'))
@@ -114,7 +129,7 @@ class hr_timesheet_sheet(osv.osv):
                 date_attendances.append((1, name, att_tuple))
             elif att_tuple[0] in [2,3]:
                 date_attendances.append((0, self.pool['hr.attendance'].browse(cr, uid, att_tuple[1]).name, att_tuple))
-            else: 
+            else:
                 date_attendances.append((0, False, att_tuple))
         date_attendances.sort()
         return [att[2] for att in date_attendances]
@@ -137,7 +152,7 @@ class hr_timesheet_sheet(osv.osv):
         for sheet in self.browse(cr, uid, ids, context=context):
             if sheet.employee_id.id not in employee_ids: employee_ids.append(sheet.employee_id.id)
         return hr_employee.attendance_action_change(cr, uid, employee_ids, context=context)
-    
+
     def _count_all(self, cr, uid, ids, field_name, arg, context=None):
         Timesheet = self.pool['hr.analytic.timesheet']
         Attendance = self.pool['hr.attendance']
@@ -181,6 +196,14 @@ class hr_timesheet_sheet(osv.osv):
         'department_id':fields.many2one('hr.department','Department'),
         'timesheet_activity_count': fields.function(_count_all, type='integer', string='Timesheet Activities', multi=True),
         'attendance_count': fields.function(_count_all, type='integer', string="Attendances", multi=True),
+        'project_id': fields.many2one('project.project','Project'),
+        'geography':fields.selection([('onsite','onsite'),('offshore','offshore')],'Geography'),
+        'billed_status':fields.selection([('billed','billed'),('unbilled','unbilled')],'Billing Status'),
+        'billing_perc': fields.integer('Billing',help="Billing percentage (0 to 100)"),
+        'allocation_perc': fields.integer('Allocation',help="Allocation percentage (0 to 100) for the period"),
+        'monthly_billing_rate':fields.integer('Monthly Billing Rate',help="Monthly billing rate for the given employee and period."),
+        'project_role' : fields.char('Project Role')
+        #'billing_rate_card_id'
     }
 
     def _default_date_from(self, cr, uid, context=None):
@@ -214,10 +237,13 @@ class hr_timesheet_sheet(osv.osv):
         'date_to' : _default_date_to,
         'state': 'new',
         'employee_id': _default_employee,
-        'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'hr_timesheet_sheet.sheet', context=c)
+        'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'hr_timesheet_sheet.sheet', context=c),
+        'allocation_perc' : 100,
+        'billing_perc':100
     }
 
     def _sheet_date(self, cr, uid, ids, forced_user_id=False, context=None):
+        print '_sheet_date() called'
         for sheet in self.browse(cr, uid, ids, context=context):
             new_user_id = forced_user_id or sheet.employee_id.user_id and sheet.employee_id.user_id.id
             if new_user_id:
@@ -226,8 +252,30 @@ class hr_timesheet_sheet(osv.osv):
                     WHERE (date_from <= %s and %s <= date_to) \
                         AND user_id=%s \
                         AND id <> %s',(sheet.date_to, sheet.date_from, new_user_id, sheet.id))
-                if cr.fetchall():
-                    return False
+                list_of_overlapping_sheets = cr.fetchall()
+                print list_of_overlapping_sheets
+                if len(list_of_overlapping_sheets) == 0:
+                    return True;
+                else:
+                    print sheet.date_from
+                    total_alloc_perc = 0
+                    for (t_id,) in list_of_overlapping_sheets:
+                        print t_id
+                        timesheet_id = self.pool.get('hr_timesheet_sheet.sheet').browse(cr,uid,[t_id],context=context)
+                        print timesheet_id.employee_id.name
+                        total_alloc_perc = total_alloc_perc + timesheet_id.allocation_perc
+
+                    print total_alloc_perc
+                    total_alloc_perc = total_alloc_perc + sheet.allocation_perc
+                    print total_alloc_perc
+
+                    if total_alloc_perc <= 100:
+                        return True
+                    else :
+                        return False
+                #if cr.fetchall():
+                #if list_of_overlapping_sheets:
+                #    return False
         return True
 
 
@@ -307,7 +355,7 @@ class account_analytic_line(osv.osv):
 
 class account_analytic_account(osv.osv):
     _inherit = "account.analytic.account"
-    
+
     def name_create(self, cr, uid, name, context=None):
         if context is None:
             context = {}
@@ -316,7 +364,7 @@ class account_analytic_account(osv.osv):
             return super(account_analytic_account, self).name_create(cr, uid, name, context=context)
         rec_id = self.create(cr, uid, {self._rec_name: name}, context)
         return self.name_get(cr, uid, [rec_id], context)[0]
-    
+
 class hr_timesheet_line(osv.osv):
     _inherit = "hr.analytic.timesheet"
 

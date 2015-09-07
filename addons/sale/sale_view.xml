@@ -109,11 +109,31 @@
                             <field name="date_order"/>
                             <field name="client_order_ref"/>
                             <field domain="[('type','=','sale')]" name="pricelist_id" groups="product.group_sale_pricelist" on_change="onchange_pricelist_id(pricelist_id,order_line)"/>
-                            <field name="currency_id" invisible="1"/>
+                            <field name="currency_id" invisible="0"/>
                         </group>
+			<group>
+			    <field name="po_no"/>
+			    <field name="delivery_due_date"/>
+			    <field name="actual_delivery_date"/>
+			    <field name="pre_po_date"/>
+			    <field name="po_date"/>
+			    <field name="pre_po_amount"/>
+			    <field name="po_amount"/>
+			    <field name="po_start"/>
+			    <field name="po_end"/>
+			    <field name="al_date"/>
+			    <field name="payment_date"/>
+			    <field name="payment_due_date"/>
+			</group>
+			<group>
+			    <field name="user_id"/>
+			    <field name="pm_user_id"/>
+			    <field name="sap_project_code"/>
+			    <field name="po_project_id" on_change="onchange_project_ids(partner_id,context)"/>
+			</group>
                     </group>
                     <notebook>
-                        <page string="Order Lines">
+                        <page string="Order Lines" invisible="0">
                             <field name="order_line">
                                 <form string="Sales Order Lines">
                                     <header groups="base.group_user">
@@ -150,7 +170,6 @@
                                         <group>
                                             <field name="tax_id" widget="many2many_tags" domain="[('parent_id','=',False),('type_tax_use','&lt;&gt;','purchase')]"/>
                                             <field name="th_weight"/>
-                                            <!-- we should put a config wizard for these two fields -->
                                             <field name="address_allotment_id"/>
                                         </group>
                                     </group>

@@ -243,6 +243,9 @@
                         <field name="struct_id" attrs="{'required':[('contract_id','&lt;&gt;',False)]}"/>
                         <field name="name"/>
                         <field name="credit_note"/>
+			<field name="department_id"/>
+			<field name="employee_no"/>
+			<field name="job_id"/>
                     </group>
                     <notebook>
                         <page string="Worked Days &amp; Inputs">

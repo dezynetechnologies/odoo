@@ -230,7 +230,10 @@ class hr_employee(osv.osv):
                  "resized as a 64x64px image, with aspect ratio preserved. "\
                  "Use this field anywhere a small image is required."),
         'passport_id': fields.char('Passport No'),
+        'employee_no': fields.char('Employee No'),
+        'doj': fields.date("Date of Joining"),
         'color': fields.integer('Color Index'),
+        'billable' : fields.boolean('Billable', help="If the billable field is set to False, it will allow you to exclude this resource from utilisation calculations."),
         'city': fields.related('address_id', 'city', type='char', string='City'),
         'login': fields.related('user_id', 'login', type='char', string='Login', readonly=1),
         'last_login': fields.related('user_id', 'date', type='datetime', string='Latest Connection', readonly=1),
@@ -242,6 +245,7 @@ class hr_employee(osv.osv):
 
     defaults = {
         'active': 1,
+        'billable': 1,
         'image': _get_default_image,
         'color': 0,
     }

@@ -34,13 +34,14 @@ class sale_report(osv.osv):
         'product_id': fields.many2one('product.product', 'Product', readonly=True),
         'product_uom': fields.many2one('product.uom', 'Unit of Measure', readonly=True),
         'product_uom_qty': fields.float('# of Qty', readonly=True),
-
         'partner_id': fields.many2one('res.partner', 'Partner', readonly=True),
         'company_id': fields.many2one('res.company', 'Company', readonly=True),
         'user_id': fields.many2one('res.users', 'Salesperson', readonly=True),
+        'pm_user_id': fields.many2one('res.users', 'Project Manager',readonly=True),
         'price_total': fields.float('Total Price', readonly=True),
         'delay': fields.float('Commitment Delay', digits=(16,2), readonly=True),
         'categ_id': fields.many2one('product.category','Category of Product', readonly=True),
+        'po_project_id': fields.many2one('project.project', readonly=True),
         'nbr': fields.integer('# of Lines', readonly=True),  # TDE FIXME master: rename into nbr_lines
         'state': fields.selection([
             ('cancel', 'Cancelled'),
@@ -75,12 +76,14 @@ class sale_report(osv.osv):
                     s.date_confirm as date_confirm,
                     s.partner_id as partner_id,
                     s.user_id as user_id,
+                    s.pm_user_id as pm_user_id,
                     s.company_id as company_id,
                     extract(epoch from avg(date_trunc('day',s.date_confirm)-date_trunc('day',s.create_date)))/(24*60*60)::decimal(16,2) as delay,
                     l.state,
                     t.categ_id as categ_id,
                     s.pricelist_id as pricelist_id,
                     s.project_id as analytic_account_id,
+                    s.po_project_id as po_project_id,
                     s.section_id as section_id
         """
         return select_str
@@ -110,6 +113,8 @@ class sale_report(osv.osv):
                     s.date_confirm,
                     s.partner_id,
                     s.user_id,
+                    s.pm_user_id,
+                    s.po_project_id,
                     s.company_id,
                     l.state,
                     s.pricelist_id,

@@ -87,5 +87,14 @@ class hr_timesheet_report(osv.osv):
                         htss.id,
                         htss.department_id"""
 
+    def init(self, cr):
+        # self._table = sale_report
+        #tools.drop_view_if_exists(cr, self._table)
+        print("""CREATE or REPLACE VIEW %s as (
+            %s
+            FROM ( %s )
+            %s
+            )""" % (self._table, self._select(), self._from(), self._group_by()))
+
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -93,13 +93,24 @@
                             <label for="date_from" string="Timesheet Period"/>
                             <div><field name="date_from" class="oe_inline"/> to <field name="date_to" class="oe_inline"/></div>
                             <field name="name" invisible="1"/>
-                            <field name="department_id" invisible="1"/>
+                            <field name="department_id" invisible="0"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                         <group groups="base.group_hr_attendance">
                             <field name="total_attendance" widget="float_time"/>
                             <field name="total_timesheet" widget="float_time"/>
                             <field name="total_difference" widget="float_time"/>
+                        </group>
+			<group>
+			    <field name="project_id"/>
+			    <field name="project_role"/>
+			    <field name="geography"/>
+			    <field name="allocation_perc"/>
+                        </group>
+			<group>
+			    <field name="billed_status"/>
+			    <field name="billing_perc"/>
+			    <field name="monthly_billing_rate"/>
                         </group>
                     </group>
                     <notebook>
@@ -214,9 +225,22 @@
             </field>
         </record>
 
+        <record id="act_hr_timesheet_resource_allocation_sheet" model="ir.actions.act_window">
+            <field name="name">Resource Allocation Sheets</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">hr_timesheet_sheet.sheet</field>
+            <field name="view_type">form</field>
+            <field name="view_id" eval="False"/>
+            <!-- <field name="context">{'search_default_to_approve':1}</field> -->
+            <field name="search_view_id" ref="view_hr_timesheet_sheet_filter"/>
+        </record>
+
+
+        <menuitem action="act_hr_timesheet_resource_allocation_sheet" id="menu_act_hr_timesheet_resource_allocation_sheet" 
+		parent="hr_attendance.menu_hr_time_tracking" sequence="2" groups="base.group_hr_user"/>
+
         <menuitem action="act_hr_timesheet_sheet_form" id="menu_act_hr_timesheet_sheet_form" parent="hr_attendance.menu_hr_time_tracking"
              sequence="2" groups="base.group_hr_user"/>
-
         <!--
             Company inheritancy
         -->
@@ -330,12 +354,18 @@
             <field name="arch" type="xml">
                 <tree colors="blue:state == 'draft';black:state in ('confirm','new');gray:state == 'done'" string="Timesheets">
                     <field name="employee_id"/>
+                    <field name="project_role"/>
                     <field name="date_from"/>
                     <field name="date_to"/>
-                    <field name="department_id" invisible="1"/>
+                    <field name="department_id" invisible="0"/>
+                    <field name="project_id"/>
                     <field name="total_attendance" widget="float_time" groups="base.group_hr_attendance"/>
                     <field name="total_timesheet" widget="float_time"/>
                     <field name="total_difference" widget="float_time" groups="base.group_hr_attendance"/>
+                    <field name="allocation_perc"/>
+                    <field name="billed_status"/>
+                    <field name="billing_perc"/>
+                    <field name="geography"/>
                     <field name="state"/>
                 </tree>
             </field>
@@ -357,6 +387,13 @@
   <!-- Timesheet Button on Employee Form -->
            
     <record id="act_hr_employee_2_hr_timesheet" model="ir.actions.act_window">
+        <field name="res_model">hr_timesheet_sheet.sheet</field>
+        <field name="view_type">form</field>
+        <field name="name">Timesheets</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_employee_id': [active_id], 'default_employee_id': active_id}</field>
+    </record>
+    <record id="act_hr_employee_2_hr_timesheet_1" model="ir.actions.act_window">
         <field name="res_model">hr_timesheet_sheet.sheet</field>
         <field name="view_type">form</field>
         <field name="name">Timesheets</field>

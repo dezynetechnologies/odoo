@@ -177,6 +177,12 @@ class sale_order(osv.osv):
                 return int(section_ids[0][0])
         return None
 
+    def onchange_project_ids(self,cr,uid,ids, partner_id ,context=None):
+        project_obj = self.pool.get('project.project')
+        project_ids = project_obj.search(cr,uid, [('partner_id','=',partner_id)])
+        return {'domain':{'project_id':[('id','in',project_ids)]}}
+
+
     _columns = {
         'name': fields.char('Order Reference', required=True, copy=False,
             readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, select=True),
@@ -245,6 +251,22 @@ class sale_order(osv.osv):
         'section_id': fields.many2one('crm.case.section', 'Sales Team'),
         'procurement_group_id': fields.many2one('procurement.group', 'Procurement group', copy=False),
         'product_id': fields.related('order_line', 'product_id', type='many2one', relation='product.product', string='Product'),
+        'po_no': fields.char('PO Number'),
+        'delivery_due_date': fields.date('Delivery Due Date'),
+        'actual_delivery_date': fields.date('Actual Delivery Date'),
+        'pre_po_date': fields.date('Pre-PO Date'),
+        'po_date': fields.date('PO Date'),
+        'po_amount': fields.integer('PO Amount'),
+        'pre_po_amount': fields.integer('Pre-PO Amount'),
+        'pm_user_id': fields.many2one('res.users', 'Project Manager'),
+        'sap_project_code': fields.char('SAP Project Code'),
+        'po_start': fields.date('PO Start'),
+        'po_end': fields.date('PO End'),
+        'al_date': fields.date('AL Date'),
+        'payment_date': fields.date('Payment Date'),
+        'payment_due_date': fields.date('Payment Due Date'),
+        #'po_project_id': fields.many2one('project.project', 'Project', help="Project for which the said PO has been received.", required=True,ondelete='cascade',domain=['&',('partner_id','=','po_project_id.partner_id'),('sap_project_code','=','po_project_id.sap_project_code')])
+        'po_project_id': fields.many2one('project.project', 'Project', help="Project for which the said PO has been received."),
     }
 
     _defaults = {
@@ -261,6 +283,7 @@ class sale_order(osv.osv):
     }
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Order Reference must be unique per Company!'),
+        ('name_po_no', 'unique(po_no)', 'Purchase Order No. must be unique across the collection!'),
     ]
     _order = 'date_order desc, id desc'
 
@@ -362,6 +385,7 @@ class sale_order(osv.osv):
             vals = dict(defaults, **vals)
         ctx = dict(context or {}, mail_create_nolog=True)
         new_id = super(sale_order, self).create(cr, uid, vals, context=ctx)
+        self.pool.get('project.project').write(cr, uid,[vals['po_project_id']],{'sale_orders':[(4,new_id)]},context = context)
         self.message_post(cr, uid, [new_id], body=_("Quotation created"), context=ctx)
         return new_id
 
@@ -926,7 +950,8 @@ class sale_order_line(osv.osv):
                     \n* The \'Done\' status is set when the sales order line has been picked. \
                     \n* The \'Cancelled\' status is set when a user cancel the sales order related.'),
         'order_partner_id': fields.related('order_id', 'partner_id', type='many2one', relation='res.partner', store=True, string='Customer'),
-        'salesman_id':fields.related('order_id', 'user_id', type='many2one', relation='res.users', store=True, string='Salesperson'),
+        'salesman_id':fields.related('order_id', 'user_id', type='many2one', relation='res.users', store=True, string='Account Manager'),
+        'pm_id':fields.related('order_id', 'user_id', type='many2one', relation='res.users', store=True, string='Project Manager'),
         'company_id': fields.related('order_id', 'company_id', type='many2one', relation='res.company', string='Company', store=True, readonly=True),
         'delay': fields.float('Delivery Lead Time', required=True, help="Number of days between the order confirmation and the shipping of the products to the customer", readonly=True, states={'draft': [('readonly', False)]}),
         'procurement_ids': fields.one2many('procurement.order', 'sale_line_id', 'Procurements'),
