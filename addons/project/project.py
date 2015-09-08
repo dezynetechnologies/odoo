@@ -20,6 +20,8 @@
 ##############################################################################
 
 from datetime import datetime, date
+from datetime import timedelta
+from dateutil import relativedelta
 from lxml import etree
 import time
 
@@ -48,15 +50,17 @@ class project_expenses(osv.osv):
                                      ('direct_cost_seiodc','Other Direct Cost(SEI-ODC)'),('sga','SGA'),
                                      ('sga_nbec','SGA(NBEC)'),
                                      ('sga_seiodc','SGA(SEI-ODC)')],string="Expense Type"),
-        'amount':fields.float('Amount'),
+        'amount':fields.integer('Amount'),
         'date_from': fields.date('Date from', required=True, select=1, readonly=False),
         'date_to': fields.date('Date to', required=True, select=1, readonly=False),
-        'currency_id' : fields.many2one('res.currency', "Currency", required=True,
-                                         help="The currency the field is expressed in."),
+        'currency_id' : fields.many2one('res.currency', "Currency", required=True,help="The currency the field is expressed in."),
 
     }
+
     _defaults = {
-       "currency_id": _get_currency
+       "currency_id": _get_currency,
+       "date_from" : lambda *a: time.strftime('%Y-%m-01'),
+       "date_to" : lambda *a: str(datetime.now() + relativedelta.relativedelta(months=+1, day=1, days=-1))[:10]
     }
 
 class project_billing_rate(osv.osv):

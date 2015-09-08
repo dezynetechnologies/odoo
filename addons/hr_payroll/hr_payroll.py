@@ -261,6 +261,14 @@ class hr_payslip(osv.osv):
             res[details.id] = len(details.line_ids)
         return res
 
+    def _get_currency(self, cr, uid, ctx):
+        comp = self.pool.get('res.users').browse(cr,uid,uid).company_id
+        if not comp:
+            comp_id = self.pool.get('res.company').search(cr, uid, [])[0]
+            comp = self.pool.get('res.company').browse(cr, uid, comp_id)
+        return comp.currency_id.id
+
+
     _columns = {
         'struct_id': fields.many2one('hr.payroll.structure', 'Structure', readonly=True, states={'draft': [('readonly', False)]}, help='Defines the rules that have to be applied to this payslip, accordingly to the contract chosen. If you let empty the field contract, this field isn\'t mandatory anymore and thus the rules applied will be all the rules set on the structure of all contracts of the employee valid for the chosen period'),
         'name': fields.char('Payslip Name', required=False, readonly=True, states={'draft': [('readonly', False)]}),
@@ -292,8 +300,12 @@ class hr_payslip(osv.osv):
         'credit_note': fields.boolean('Credit Note', help="Indicates this payslip has a refund of another", readonly=True, states={'draft': [('readonly', False)]}),
         'payslip_run_id': fields.many2one('hr.payslip.run', 'Payslip Batches', readonly=True, states={'draft': [('readonly', False)]}, copy=False),
         'payslip_count': fields.function(_count_detail_payslip, type='integer', string="Payslip Computation Details"),
+	'basic_pay': fields.integer('Basic Pay',required=True),
+        'currency_id' : fields.many2one('res.currency', "Currency", required=True, help="The currency the field is expressed in."),
+
     }
     _defaults = {
+        'currency_id': _get_currency,
         'date_from': lambda *a: time.strftime('%Y-%m-01'),
         'date_to': lambda *a: str(datetime.now() + relativedelta.relativedelta(months=+1, day=1, days=-1))[:10],
         'state': 'draft',
@@ -330,6 +342,10 @@ class hr_payslip(osv.osv):
 
     _constraints = [(_check_dates, "Payslip 'Date From' must be before 'Date To'.", ['date_from', 'date_to']),
                     (_check_employee_no,"Payslip employee number should be same as in employee records",['employee_no','employee_id.employee_no'])]
+
+    _sql_constraints = [
+        ('salary_month_uniq', 'unique (employee_id,date_from)', 'The salary entry must be unique per employee for a month !')
+    ]
 
     def cancel_sheet(self, cr, uid, ids, context=None):
         return self.write(cr, uid, ids, {'state': 'cancel'}, context=context)

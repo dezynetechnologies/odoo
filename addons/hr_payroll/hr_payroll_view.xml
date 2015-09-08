@@ -189,11 +189,13 @@
             <field name="model">hr.payslip</field>
             <field name="arch" type="xml">
                 <tree colors="blue:state in ('confirm','hr_check','accont_check');black:state == 'new';gray:state == 'cancel'" string="Payslips">
-                    <field name="number"/>
+                    <!--<field name="number"/> -->
                     <field name="employee_id"/>
                     <field name="name"/>
                     <field name="date_from"/>
                     <field name="date_to"/>
+                    <field name="basic_pay"/>
+                    <field name="currency_id"/>
                     <field name="state"/>
                     <field name="company_id" groups="base.group_multi_company" widget="selection"/>
                     <field name="payslip_run_id" invisible="1"/>
@@ -245,6 +247,8 @@
                         <field name="credit_note"/>
 			<field name="department_id"/>
 			<field name="employee_no"/>
+			<field name="basic_pay"/>
+			<field name="currency_id"/>
 			<field name="job_id"/>
                     </group>
                     <notebook>

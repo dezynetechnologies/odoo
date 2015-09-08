@@ -129,7 +129,8 @@
 			    <field name="user_id"/>
 			    <field name="pm_user_id"/>
 			    <field name="sap_project_code"/>
-			    <field name="po_project_id" on_change="onchange_project_ids(partner_id,context)"/>
+			    <!--<field name="po_project_id" domain="[('partner_id','=',partner_id)]" on_change="onchange_project_ids(partner_id,context)" context="{'partner_id' : partner_id,'sap_project_code' : sap_project_code,'user_id' : pm_user_id}"/> -->
+			    <field name="po_project_id" domain="[('partner_id','=',partner_id)]" on_change="onchange_project_ids(partner_id,context)" context="{'sap_project_code':sap_project_code}"/>
 			</group>
                     </group>
                     <notebook>
