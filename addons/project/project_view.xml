@@ -744,6 +744,23 @@
             </field>
         </record>
 
+        <record id="billing_rate_form" model="ir.ui.view">
+            <field name="name">project.billing.rate.form</field>
+            <field name="model">project.billing.rate</field>
+            <field name="arch" type="xml">
+                <form string="Billing Rate">
+                    <group col="4">
+                        <field name="name" colspan="4"/>
+                        <field name="role"/>
+                    </group>
+                    <group col="4">
+                        <field name="rate" colspan="4"/>
+                        <field name="currency_id" groups="base.group_multi_currency"/>
+		            </group>
+                </form>
+            </field>
+        </record>
+
 
         <record id="open_billing_rates_all" model="ir.actions.act_window">
             <field name="name">Billing Rates</field>

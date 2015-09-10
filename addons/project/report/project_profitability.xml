@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+
+        <menuitem action="action_project_profitability_tree" id="menu_project_profitability_tree" parent="base.menu_project_report"/>
+
+    </data>
+</openerp>

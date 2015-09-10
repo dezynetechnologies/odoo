@@ -20,6 +20,7 @@
 ##############################################################################
 
 import project_report
+import project_profitability
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
 

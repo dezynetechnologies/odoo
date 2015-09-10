@@ -61,6 +61,7 @@ Dashboard / Reports for Project Management will include:
         'res_partner_view.xml',
         'report/project_report_view.xml',
         'report/project_cumulative.xml',
+        #'report/project_profitability.xml',
         'res_config_view.xml',
         'views/project.xml',
     ],

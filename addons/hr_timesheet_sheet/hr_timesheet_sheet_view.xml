@@ -103,15 +103,16 @@
                         </group>
 			<group>
 			    <field name="project_id"/>
+                <field name="billing_rate_card_id"/>
 			    <field name="project_role"/>
 			    <field name="geography"/>
 			    <field name="allocation_perc"/>
-                        </group>
+            </group>
 			<group>
 			    <field name="billed_status"/>
 			    <field name="billing_perc"/>
 			    <field name="monthly_billing_rate"/>
-                        </group>
+            </group>
                     </group>
                     <notebook>
                         <page string="Summary">
@@ -354,14 +355,16 @@
             <field name="arch" type="xml">
                 <tree colors="blue:state == 'draft';black:state in ('confirm','new');gray:state == 'done'" string="Timesheets">
                     <field name="employee_id"/>
-                    <field name="project_role"/>
+                    <field name="department_id" invisible="0"/>
                     <field name="date_from"/>
                     <field name="date_to"/>
-                    <field name="department_id" invisible="0"/>
                     <field name="project_id"/>
-                    <field name="total_attendance" widget="float_time" groups="base.group_hr_attendance"/>
+                    <field name="billing_rate_card_id"/>
+                    <field name="project_role"/>
+                    <field name="monthly_billing_rate"/>
+                    <!-- <field name="total_attendance" widget="float_time" groups="base.group_hr_attendance"/>
                     <field name="total_timesheet" widget="float_time"/>
-                    <field name="total_difference" widget="float_time" groups="base.group_hr_attendance"/>
+                    <field name="total_difference" widget="float_time" groups="base.group_hr_attendance"/> -->
                     <field name="allocation_perc"/>
                     <field name="billed_status"/>
                     <field name="billing_perc"/>

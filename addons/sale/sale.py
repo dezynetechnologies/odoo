@@ -348,6 +348,7 @@ class sale_order(osv.osv):
         return r
 
     def onchange_partner_id(self, cr, uid, ids, part, context=None):
+        print 'onchange_partner_id() called line no 351'
         if not part:
             return {'value': {'partner_invoice_id': False, 'partner_shipping_id': False,  'payment_term': False, 'fiscal_position': False}}
 

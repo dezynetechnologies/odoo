@@ -75,9 +75,9 @@ class project_billing_rate(osv.osv):
         return comp.currency_id.id
 
     _columns = {
-        'name' : fields.char('',required=True),
+        'name' : fields.char('Name',required=True),
         'role' : fields.char('Project Role'),
-        'rate': fields.float('Project Role Rate'),
+        'rate': fields.integer('Project Role Rate'),
         'currency_id' : fields.many2one('res.currency', "Currency", required=True, help="The currency the field is expressed in."),
     }
     _order = "id"
@@ -91,7 +91,7 @@ class project_billing_rate_card(osv.osv):
     _columns = {
         'name' : fields.char('Billing Rate Card Name',required=True),
         'project_ids': fields.many2many('project.project', string="Projects"),
-        'billing_table': fields.one2many('project.billing.rate','role','Billing Table',select=1),
+        'billing_table': fields.many2many('project.billing.rate','project_billing_rate_card_rel','card_id','rate_id',string="Billing Table"),
     }
     _order = "id"
     _defaults = {
@@ -713,6 +713,7 @@ class task(osv.osv):
     }
 
     def _get_default_partner(self, cr, uid, context=None):
+        print '_get_default_partner()'
         project_id = self._get_default_project_id(cr, uid, context)
         if project_id:
             project = self.pool.get('project.project').browse(cr, uid, project_id, context=context)

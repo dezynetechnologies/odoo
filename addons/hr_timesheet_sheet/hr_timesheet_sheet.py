@@ -202,8 +202,8 @@ class hr_timesheet_sheet(osv.osv):
         'billing_perc': fields.integer('Billing',help="Billing percentage (0 to 100)"),
         'allocation_perc': fields.integer('Allocation',help="Allocation percentage (0 to 100) for the period"),
         'monthly_billing_rate':fields.integer('Monthly Billing Rate',help="Monthly billing rate for the given employee and period."),
-        'project_role' : fields.char('Project Role')
-        #'billing_rate_card_id'
+        'project_role' : fields.char('Project Role'),
+        'billing_rate_card_id' : fields.many2one('project.billing.rate.card','Billing Rate Card')
     }
 
     def _default_date_from(self, cr, uid, context=None):
