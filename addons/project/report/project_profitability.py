@@ -23,93 +23,103 @@ from openerp.osv import fields, osv
 from openerp import tools
 
 
-class report_project_task_user(osv.osv):
-    _name = "report.project.task.user"
-    _description = "Tasks by user and project"
+class project_profitability_report(osv.osv):
+    _name = "project.profitability.report"
+    _description = "Project Profitability"
     _auto = False
+    #_rec_name = 'date'
+
     _columns = {
-        'name': fields.char('Task Summary', readonly=True),
-        'user_id': fields.many2one('res.users', 'Assigned To', readonly=True),
-        'reviewer_id': fields.many2one('res.users', 'Reviewer', readonly=True),
-        'date_start': fields.datetime('Assignation Date', readonly=True),
-        'no_of_days': fields.integer('# of Days', size=128, readonly=True),
-        'date_end': fields.datetime('Ending Date', readonly=True),
-        'date_deadline': fields.date('Deadline', readonly=True),
-        'date_last_stage_update': fields.datetime('Last Stage Update', readonly=True),
-        'project_id': fields.many2one('project.project', 'Project', readonly=True),
-        'hours_planned': fields.float('Planned Hours', readonly=True),
-        'hours_effective': fields.float('Effective Hours', readonly=True),
-        'hours_delay': fields.float('Avg. Plan.-Eff.', readonly=True),
-        'remaining_hours': fields.float('Remaining Hours', readonly=True),
-        'progress': fields.float('Progress', readonly=True, group_operator='avg'),
-        'total_hours': fields.float('Total Hours', readonly=True),
-        'closing_days': fields.float('Days to Close', digits=(16,2), readonly=True, group_operator="avg",
-                                       help="Number of Days to close the task"),
-        'opening_days': fields.float('Days to Assign', digits=(16,2), readonly=True, group_operator="avg",
-                                       help="Number of Days to Open the task"),
-        'delay_endings_days': fields.float('Overpassed Deadline', digits=(16,2), readonly=True),
-        'nbr': fields.integer('# of Tasks', readonly=True),  # TDE FIXME master: rename into nbr_tasks
-        'priority': fields.selection([('0','Low'), ('1','Normal'), ('2','High')],
-            string='Priority', size=1, readonly=True),
-        'state': fields.selection([('normal', 'In Progress'),('blocked', 'Blocked'),('done', 'Ready for next stage')],'Status', readonly=True),
-        'company_id': fields.many2one('res.company', 'Company', readonly=True),
-        'partner_id': fields.many2one('res.partner', 'Contact', readonly=True),
-        'stage_id': fields.many2one('project.task.type', 'Stage'),
-    }
-    _order = 'name desc, project_id'
+        'name': fields.char("Name", required=True),
+        'employee_id': fields.many2one('hr.employee', 'Employee', readonly=True),
+        'employee_no': fields.char('Employee No'),
+        'doj': fields.date("Date of Joining"),
+        'department_id':fields.many2one('hr.department','Department',readonly=True),
+        'date_from': fields.date('Date from',readonly=True,),
+        'date_to': fields.date('Date to',readonly=True),
+        'project_id': fields.many2one('project.project','Project'),
+        'geography':fields.selection([('onsite','onsite'),('offshore','offshore')],'Geography'),
+        'billed_status':fields.selection([('billed','billed'),('unbilled','unbilled')],'Billing Status'),
+        'project_role' : fields.char('Project Role'),
+        'billing_perc': fields.integer('Billing',help="Billing percentage (0 to 100)"),
+        'allocation_perc': fields.integer('Allocation',help="Allocation percentage (0 to 100) for the period"),
+        'pay' : fields.integer('Pay(cost)'),
+        'profit' : fields.integer('Gross Profit'),
+        'profit_percentage' : fields.float('Profit Percentage'),
+        'state' : fields.selection([
+            ('new', 'New'),
+            ('draft','Draft'),
+            ('confirm','Confirmed'),
+            ('done','Done')], 'Status', readonly=True),
+        }
+    _order = 'name asc'
+
+    def _select(self):
+        select_str = """
+             SELECT min(e.id) as id,
+                    e.name_related as name,
+                    e.id as employee_id,
+                    e.employee_no as employee_no,
+                    e.doj as doj,
+                    t.department_id as department_id,
+                    t.date_from as date_from,
+                    t.date_to as date_to,
+                    t.project_id as project_id,
+                    t.geography as geography,
+                    t.billed_status as billed_status,
+                    t.project_role as project_role,
+                    t.billing_perc as billing_perc,
+                    t.allocation_perc as allocation_perc,
+                    ( t.date_to - t.date_from + 1) as num_of_days,
+                    date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) as total_days,
+                    ((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )as pay,
+                    ((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) ) as billing,
+                    ( (((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) - (((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) ) as profit,
+                    ((( (((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) - (((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) )
+)*100/(((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) ) as profit_percentage
+        """
+        return select_str
+
+    def _from(self):
+        from_str = """
+                hr_employee e
+                    left join hr_timesheet_sheet_sheet t on e.id=t.employee_id
+                    left join public.hr_payslip p on
+                        t.employee_id = p.employee_id  and t.date_from = p.date_from
+        """
+        return from_str
+
+    def _group_by(self):
+        group_by_str = """
+            GROUP BY e.id,
+                    t.date_from,
+                    t.date_to,
+                    t.department_id,
+                    t.geography,
+                    t.billed_status,
+                    t.project_id,
+                    t.project_role,
+                    t.billing_perc,
+                    t.allocation_perc,
+                    p.basic_pay,
+                    t.monthly_billing_rate
+
+        """
+        return group_by_str
 
     def init(self, cr):
-        tools.sql.drop_view_if_exists(cr, 'report_project_task_user')
-        cr.execute("""
-            CREATE view report_project_task_user as
-              SELECT
-                    (select 1 ) AS nbr,
-                    t.id as id,
-                    t.date_start as date_start,
-                    t.date_end as date_end,
-                    t.date_last_stage_update as date_last_stage_update,
-                    t.date_deadline as date_deadline,
-                    abs((extract('epoch' from (t.write_date-t.date_start)))/(3600*24))  as no_of_days,
-                    t.user_id,
-                    t.reviewer_id,
-                    progress as progress,
-                    t.project_id,
-                    t.effective_hours as hours_effective,
-                    t.priority,
-                    t.name as name,
-                    t.company_id,
-                    t.partner_id,
-                    t.stage_id as stage_id,
-                    t.kanban_state as state,
-                    remaining_hours as remaining_hours,
-                    total_hours as total_hours,
-                    t.delay_hours as hours_delay,
-                    planned_hours as hours_planned,
-                    (extract('epoch' from (t.write_date-t.create_date)))/(3600*24)  as closing_days,
-                    (extract('epoch' from (t.date_start-t.create_date)))/(3600*24)  as opening_days,
-                    (extract('epoch' from (t.date_deadline-(now() at time zone 'UTC'))))/(3600*24)  as delay_endings_days
-              FROM project_task t
-                WHERE t.active = 'true'
-                GROUP BY
-                    t.id,
-                    remaining_hours,
-                    t.effective_hours,
-                    progress,
-                    total_hours,
-                    planned_hours,
-                    hours_delay,
-                    create_date,
-                    write_date,
-                    date_start,
-                    date_end,
-                    date_deadline,
-                    date_last_stage_update,
-                    t.user_id,
-                    t.reviewer_id,
-                    t.project_id,
-                    t.priority,
-                    name,
-                    t.company_id,
-                    t.partner_id,
-                    stage_id
-        """)
+        # self._table = sale_report
+        tools.drop_view_if_exists(cr, self._table)
+        print("""CREATE or REPLACE VIEW %s as (
+            %s
+            FROM ( %s )
+            %s
+            )""" % (self._table, self._select(), self._from(), self._group_by()))
+        cr.execute("""CREATE or REPLACE VIEW %s as (
+            %s
+            FROM ( %s )
+            %s
+            )""" % (self._table, self._select(), self._from(), self._group_by()))
+
+
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
