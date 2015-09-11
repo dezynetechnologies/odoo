@@ -10,6 +10,7 @@
                     <field name="date_from" interval="month" type="col"/>
                     <field name="geography"/>
                     <field name="pay" type="measure"/>
+                    <field name="billing" type="measure"/>
                     <field name="profit" type="measure"/>
                 </graph>
             </field>

@@ -44,6 +44,7 @@ class project_profitability_report(osv.osv):
         'billing_perc': fields.integer('Billing',help="Billing percentage (0 to 100)"),
         'allocation_perc': fields.integer('Allocation',help="Allocation percentage (0 to 100) for the period"),
         'pay' : fields.integer('Pay(cost)'),
+        'billing' : fields.integer('Billing'),
         'profit' : fields.integer('Gross Profit'),
         'profit_percentage' : fields.float('Profit Percentage'),
         'state' : fields.selection([
