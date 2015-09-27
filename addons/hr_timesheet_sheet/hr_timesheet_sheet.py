@@ -197,6 +197,7 @@ class hr_timesheet_sheet(osv.osv):
         'timesheet_activity_count': fields.function(_count_all, type='integer', string='Timesheet Activities', multi=True),
         'attendance_count': fields.function(_count_all, type='integer', string="Attendances", multi=True),
         'project_id': fields.many2one('project.project','Project'),
+        'second_level': fields.char('Second Level Tracking'),
         'geography':fields.selection([('onsite','onsite'),('offshore','offshore')],'Geography'),
         'billed_status':fields.selection([('billed','billed'),('unbilled','unbilled')],'Billing Status'),
         'billing_perc': fields.integer('Billing',help="Billing percentage (0 to 100)"),

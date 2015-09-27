@@ -3,8 +3,8 @@
     <data>
         <!-- Root Menus -->
 
-        <menuitem id="payroll_configure" parent="hr.menu_hr_configuration" name="Payroll" groups="base.group_hr_manager" sequence="45"/>
-        <menuitem id="menu_hr_root_payroll" parent="hr.menu_hr_root" name="Payroll" sequence="30"/>
+        <!--menuitem id="payroll_configure" parent="hr.menu_hr_configuration" name="Payroll" groups="base.group_hr_manager" sequence="45"/-->
+        <menuitem id="menu_hr_root_payroll" parent="hr.menu_hr_root" name="Employee Costing" sequence="30"/>
         <menuitem id="menu_hr_payroll_reporting" parent="hr.menu_hr_reporting" name="Payroll" groups="base.group_hr_manager"/>
 
         <!-- Contract View -->
@@ -96,12 +96,12 @@
             <field name="view_type">form</field>
             <field name="view_id" ref="view_hr_payroll_structure_list_view"/>
         </record>
-        <menuitem
+        <!--menuitem
             id="menu_hr_payroll_structure_view"
             action="action_view_hr_payroll_structure_list_form"
             parent="payroll_configure"
             sequence="2"
-        />
+        /-->
         <record id="action_view_hr_payroll_structure_tree" model="ir.actions.act_window">
             <field name="name">Salary Structures Hierarchy</field>
             <field name="res_model">hr.payroll.structure</field>
@@ -109,13 +109,13 @@
             <field name="domain">[('parent_id','=',False)]</field>
             <field name="view_id" ref="view_hr_payroll_structure_tree"/>
         </record>
-        <menuitem
+        <!--menuitem
             id="menu_hr_payroll_structure_tree"
             action="action_view_hr_payroll_structure_tree"
             parent="payroll_configure"
             sequence="2"
             icon="STOCK_INDENT"
-        />
+        /-->
         <!-- End Salary structure -->
 
         <!-- Payslip Line -->
@@ -194,7 +194,9 @@
                     <field name="name"/>
                     <field name="date_from"/>
                     <field name="date_to"/>
-                    <field name="basic_pay"/>
+                    <field name="basic_pay" invisible="1"/>
+                    <field name="onsite_allowance"/>
+                    <field name="offshore_salary"/>
                     <field name="currency_id"/>
                     <field name="state"/>
                     <field name="company_id" groups="base.group_multi_company" widget="selection"/>
@@ -247,7 +249,9 @@
                         <field name="credit_note"/>
 			<field name="department_id"/>
 			<field name="employee_no"/>
-			<field name="basic_pay"/>
+			<field name="basic_pay" invisible="1"/>
+            <field name="onsite_allowance"/>
+            <field name="offshore_salary"/>
 			<field name="currency_id"/>
 			<field name="job_id"/>
                     </group>
@@ -468,13 +472,13 @@
             <field name="view_id" ref="hr_salary_rule_category_tree"/>
            <field name="search_view_id" ref="view_hr_salary_rule_category_filter"/>
         </record>
-        <menuitem
+        <!--menuitem
             id="menu_hr_salary_rule_category"
             action="action_hr_salary_rule_category"
             parent="payroll_configure"
             sequence="11"
             groups="base.group_no_one"
-        />
+        /-->
         <record id="action_hr_salary_rule_category_tree_view" model="ir.actions.act_window">
             <field name="name">Salary Rule Categories Hierarchy</field>
             <field name="res_model">hr.salary.rule.category</field>
@@ -482,14 +486,14 @@
             <field name="domain">[('parent_id','=',False)]</field>
             <field name="view_id" ref="hr_salary_rule_category_tree_view"/>
         </record>
-        <menuitem
+        <!--menuitem
             id="menu_hr_salary_rule_category_tree_view"
             action="action_hr_salary_rule_category_tree_view"
             parent="payroll_configure"
             sequence="12"
             icon="STOCK_INDENT"
             groups="base.group_no_one"
-        />
+        /-->
 
         <!--
         Contribution Register
@@ -545,12 +549,12 @@
             </field>
             <field name="view_id" ref="hr_contribution_register_tree"/>
         </record>
-        <menuitem
+        <!--menuitem
             id="menu_action_hr_contribution_register_form"
             action="action_contribution_register_form"
             parent="payroll_configure"
             sequence="14"
-        />
+        /-->
 
         <!-- Salary Rules -->
 
@@ -664,7 +668,7 @@
             <field name="search_view_id" ref="view_hr_rule_filter"/>
         </record>
 
-        <menuitem id="menu_action_hr_salary_rule_form" action="action_salary_rule_form" parent="payroll_configure" sequence="12"/>
+        <!--menuitem id="menu_action_hr_salary_rule_form" action="action_salary_rule_form" parent="payroll_configure" sequence="12"/-->
 
 
         <act_window name="All Children Rules"
@@ -741,7 +745,7 @@
             <field name="view_id" ref="hr_payslip_run_tree"/>
             <field name="search_view_id" ref="hr_payslip_run_filter"/>
         </record>
-        <menuitem action="action_hr_payslip_run_tree" id="menu_hr_payslip_run" parent="menu_hr_root_payroll"/>
+        <!--menuitem action="action_hr_payslip_run_tree" id="menu_hr_payslip_run" parent="menu_hr_root_payroll"/-->
 
         <!--  Shortcuts -->
 

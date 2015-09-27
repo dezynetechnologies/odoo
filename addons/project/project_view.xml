@@ -117,8 +117,8 @@
                             <field name="partner_id" on_change="onchange_partner_id(partner_id)" string="Customer"/>
 			    <field name="sap_project_code"/>
 			    <field name="department_id"/>
-			    <field name="first_level"/>
-			    <field name="second_level"/>
+                <field name="date_start"/>
+                <field name="date" string="End Date"/>
 			    <field name="project_status"/>
                         </group>
                             <p attrs="{'invisible': [('analytic_account_id','=',False)]}">
@@ -168,7 +168,7 @@
 			<page string="Resource Allocation Sheet">
 			    <field name="resource_allocations" on_change="onchange_resource_allocations(resource_allocations)"/>
 			</page>
-                        <page string="Other Info">
+                        <!-- page string="Other Info">
                             <group string="Administration">
                                 <field name="privacy_visibility" widget="radio"/>
                                 <field name="planned_hours" widget="float_time"
@@ -189,7 +189,7 @@
                         </page>
                         <page string="Project Stages" attrs="{'invisible': [('use_tasks', '=', False)]}" name="project_stages">
                              <field name="type_ids"/>
-                        </page>
+                        </page-->
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
@@ -658,7 +658,7 @@
             <field name="act_window_id" ref="action_view_task"/>
         </record>
 
-        <menuitem action="action_view_task" id="menu_action_view_task" parent="project.menu_project_management" sequence="5"/>
+        <!--menuitem action="action_view_task" id="menu_action_view_task" parent="project.menu_project_management" sequence="5"/-->
 
         <record id="action_view_task_overpassed_draft" model="ir.actions.act_window">
             <field name="name">Overpassed Tasks</field>
@@ -914,7 +914,7 @@
 
         <menuitem action="open_project_billing_rate_cards_all" id="menu_billing_cards" name="Billing Rate Cards" parent="menu_project_management" sequence="4"/>
 
-        <menuitem action="open_billing_rates_all" id="menu_billing_rate" name="Billing Rates" parent="menu_project_management" sequence="5"/>
+        <!--menuitem action="open_billing_rates_all" id="menu_billing_rate" name="Billing Rates" parent="menu_project_management" sequence="5"/-->
 
          <record id="task_company" model="ir.ui.view">
             <field name="name">res.company.task.config</field>

@@ -103,6 +103,7 @@
                         </group>
 			<group>
 			    <field name="project_id"/>
+                <field name="second_level"/>
                 <field name="billing_rate_card_id"/>
 			    <field name="project_role"/>
 			    <field name="geography"/>
@@ -240,8 +241,8 @@
         <menuitem action="act_hr_timesheet_resource_allocation_sheet" id="menu_act_hr_timesheet_resource_allocation_sheet" 
 		parent="hr_attendance.menu_hr_time_tracking" sequence="2" groups="base.group_hr_user"/>
 
-        <menuitem action="act_hr_timesheet_sheet_form" id="menu_act_hr_timesheet_sheet_form" parent="hr_attendance.menu_hr_time_tracking"
-             sequence="2" groups="base.group_hr_user"/>
+        <!--menuitem action="act_hr_timesheet_sheet_form" id="menu_act_hr_timesheet_sheet_form" parent="hr_attendance.menu_hr_time_tracking"
+             sequence="2" groups="base.group_hr_user"/-->
         <!--
             Company inheritancy
         -->
@@ -359,6 +360,7 @@
                     <field name="date_from"/>
                     <field name="date_to"/>
                     <field name="project_id"/>
+                    <field name="second_level"/>
                     <field name="billing_rate_card_id"/>
                     <field name="project_role"/>
                     <field name="monthly_billing_rate"/>

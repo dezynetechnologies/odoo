@@ -300,7 +300,9 @@ class hr_payslip(osv.osv):
         'credit_note': fields.boolean('Credit Note', help="Indicates this payslip has a refund of another", readonly=True, states={'draft': [('readonly', False)]}),
         'payslip_run_id': fields.many2one('hr.payslip.run', 'Payslip Batches', readonly=True, states={'draft': [('readonly', False)]}, copy=False),
         'payslip_count': fields.function(_count_detail_payslip, type='integer', string="Payslip Computation Details"),
-	'basic_pay': fields.integer('Basic Pay',required=True),
+	    'basic_pay': fields.integer('Basic Pay',required=True),
+        'onsite_allowance' : fields.integer('Onsite Allowance',required=True),
+        'offshore_salary' : fields.integer('Offshore Salary',required=True),
         'currency_id' : fields.many2one('res.currency', "Currency", required=True, help="The currency the field is expressed in."),
 
     }

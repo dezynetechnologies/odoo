@@ -79,6 +79,8 @@
                 <tree string="Contacts">
                     <field name="display_name"/>
                     <field name="function" invisible="1"/>
+                    <field name="customer_code"/>
+                    <field name="customer_department"/>
                     <field name="phone"/>
                     <field name="email"/>
                     <field name="user_id" invisible="1"/>
@@ -115,6 +117,8 @@
                         <field name="email" widget="email" required="context.get('force_email', False)" attrs="{'required': [('user_ids','!=', [])]}"/>
                         <field name="phone"/>
                         <field name="mobile"/>
+                        <field name="customer_code" placeholder="customer code"/>
+                        <field name="customer_department" placeholder="customer department"/>
                     </group>
                 </form>
             </field>
@@ -142,6 +146,7 @@
                             attrs="{'invisible': [('is_company','=', True),('parent_id', '=', False)]}"
                             on_change="onchange_address(use_parent_address, parent_id)"/>
                         <field name="category_id" widget="many2many_tags" placeholder="Tags..."/>
+
                     </div>
                     <div class="oe_right oe_button_box" name="buttons"> </div>
 
@@ -180,9 +185,12 @@
                             <field name="phone"/>
                             <field name="mobile"/>
                             <field name="fax"/>
+
                             <field name="user_ids" invisible="1"/>
                             <field name="email" widget="email" attrs="{'required': [('user_ids','!=', [])]}"/>
                             <field name="title" options='{"no_open": True}'/>
+                            <field name="customer_code" placeholder="customer code"/>
+                            <field name="customer_department" placeholder="customer department"/>
                         </group>
                     </group>
 
@@ -370,6 +378,8 @@
                     <field name="city"/>
                     <field name="country_id"/>
                     <field name="mobile"/>
+                    <field name="customer_code"/>
+                    <field name="customer_department"/>
                     <field name="state_id"/>
                     <field name="category_id"/>
                     <field name="has_image"/>

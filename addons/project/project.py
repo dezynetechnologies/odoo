@@ -413,8 +413,6 @@ class project(osv.osv):
         'project_status': fields.selection(
             [('passive', 'Passive'), ('active', 'Active'), ('suspended', 'Suspended'), ('completed', 'Completed'),
              ('cancelled', 'Cancelled')], 'Project Status', copy=False),
-        'first_level': fields.char('First Level Tracking'),
-        'second_level': fields.char('Second Level Tracking'),
         # 'sale_orders': fields.one2many('sale.order', 'po_project_id', 'Sale Orders'),
         #'sale_orders': fields.many2many('sale.order', 'project_sale_order_rel', 'project_id', 'sales_id',
         'sale_orders': fields.many2many('sale.order', string="Sale Orders", states={'close': [('readonly', True)], 'cancelled': [('readonly', True)]}),
