@@ -49,6 +49,8 @@
                                     <group string="Position">
                                         <field name="department_id" on_change="onchange_department_id(department_id)"/>
                                         <field name="job_id"/>
+                                        <field name="emp_band"/>
+                                        <field name="emp_sband"/>
                                         <field name="parent_id" invisible="1"/>
                                         <field name="coach_id" invisible="1"/>
                                     </group>

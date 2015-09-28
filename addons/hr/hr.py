@@ -234,6 +234,8 @@ class hr_employee(osv.osv):
                  "Use this field anywhere a small image is required."),
         'passport_id': fields.char('Passport No'),
         'employee_no': fields.char('Employee No'),
+        'emp_band': fields.char('Employee Band'),
+        'emp_sband': fields.char('Employee Sub-Band'),
         'doj': fields.date("Date of Joining"),
         'doe': fields.date("Date of Exit"),
         'color': fields.integer('Color Index'),

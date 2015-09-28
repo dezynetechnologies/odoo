@@ -87,6 +87,7 @@
                         <label for="employee_id" class="oe_edit_only"/>
                         <h1><field name="employee_id" on_change="onchange_employee_id(employee_id)" class="oe_inline"/></h1>
                         <field name="user_id" invisible="1"/>
+                        <field name="employee_no"/>
                     </div>
                     <group>
                         <group>
@@ -115,7 +116,7 @@
 			    <field name="monthly_billing_rate"/>
             </group>
                     </group>
-                    <notebook>
+                    <!--notebook>
                         <page string="Summary">
                             <widget type="weekly_timesheet" attrs="{'readonly': [['state', 'not in', ['new', 'draft']]]}">
                             </widget>
@@ -177,7 +178,7 @@
                                 </tree>
                             </field>
                         </page>
-                    </notebook>
+                    </notebook-->
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" widget="mail_followers"/>
@@ -356,6 +357,7 @@
             <field name="arch" type="xml">
                 <tree colors="blue:state == 'draft';black:state in ('confirm','new');gray:state == 'done'" string="Timesheets">
                     <field name="employee_id"/>
+                    <field name="employee_no"/>
                     <field name="department_id" invisible="0"/>
                     <field name="date_from"/>
                     <field name="date_to"/>

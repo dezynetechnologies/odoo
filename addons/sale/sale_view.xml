@@ -41,11 +41,13 @@
             <field name="arch" type="xml">
                 <tree string="Sales Orders" fonts="bold:message_unread==True" colors="grey:state=='cancel';blue:state in ('waiting_date','manual');red:state in ('invoice_except','shipping_except')">
                     <field name="message_unread" invisible="1"/>
+                    <field name="po_no"/>
                     <field name="name" string="Order Number"/>
                     <field name="date_order"/>
                     <field name="partner_id"/>
                     <field name="user_id"/>
                     <field name="amount_total" sum="Total Tax Included"/>
+                    <field name="tax_category"/>
                     <field name="state"/>
                 </tree>
             </field>
@@ -67,6 +69,40 @@
                 </tree>
             </field>
         </record>
+
+        <record id="sale_invoice_tree" model="ir.ui.view">
+            <field name="name">sale.invoice.tree</field>
+            <field name="model">sale.invoice</field>
+            <field name="arch" type="xml">
+                <tree string="Sale Invoice">
+                        <field name="number"/>
+                        <field name="shipping_number" />
+                        <field name="date" />
+                        <field name="amount" />
+                        <field name="currency_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="sale_invoice_form" model="ir.ui.view">
+            <field name="name">sale.invoice.form</field>
+            <field name="model">sale.invoice</field>
+            <field name="arch" type="xml">
+                <form string="Sale Invoice">
+                    <group col="4">
+                        <field name="number"/>
+                        <field name="shipping_number"/>
+                        <field name="date"/>
+                    </group>
+                    <group col="4">
+                        <field name="amount"/>
+                        <field name="currency_id"/>
+		    </group>
+                </form>
+            </field>
+        </record>
+
+
 
         <record id="view_order_form" model="ir.ui.view">
             <field name="name">sale.order.form</field>
@@ -112,17 +148,19 @@
                             <field name="currency_id" invisible="1"/>
                         </group>
 			<group>
-                <field name="nti_bu"/>
-                <field name="client_bu"/>
-                <field name="first_level"/>
+                	    <field name="nti_bu"/>
+                	    <field name="client_bu"/>
+                	    <field name="sales_loc"/>
+                            <field name="first_level"/>
 			    <field name="po_no"/>
 			    <field name="delivery_due_date"/>
 			    <field name="actual_delivery_date"/>
 			    <field name="pre_po_date"/>
 			    <field name="po_date"/>
-                <field name="po_currency_id"/>
+                	    <field name="po_currency_id"/>
 			    <field name="pre_po_amount"/>
 			    <field name="po_amount"/>
+                    	    <field name="tax_category"/>
 			    <field name="po_start"/>
 			    <field name="po_end"/>
 			    <field name="al_date"/>
@@ -138,6 +176,9 @@
 			</group>
                     </group>
                     <notebook>
+                        <page string="Invoices" invisible="0">
+                            <field name="sale_invoice_ids"/>
+                        </page>
                         <page string="Order Lines" invisible="0">
                             <field name="order_line">
                                 <form string="Sales Order Lines">
@@ -209,14 +250,14 @@
                                 </tree>
                             </field>
                             <group class="oe_subtotal_footer oe_right" colspan="2" name="sale_total">
-                                <field name="amount_untaxed" widget='monetary' options="{'currency_field': 'currency_id'}"/>
-                                <field name="amount_tax" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                                <field name="amount_untaxed" widget='monetary' options="{'currency_field': 'po_currency_id'}"/>
+                                <field name="amount_tax" widget='monetary' options="{'currency_field': 'po_currency_id'}"/>
                                 <div class="oe_subtotal_footer_separator oe_inline">
                                     <label for="amount_total" />
                                     <button name="button_dummy"
                                         states="draft,sent" string="(update)" type="object" class="oe_edit_only oe_link"/>
                                 </div>
-                                <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                                <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator" widget='monetary' options="{'currency_field': 'po_currency_id'}"/>
                             </group>
                             <div class="oe_clear"/>
                             <field name="note" class="oe_inline" placeholder="Terms and conditions..."/>

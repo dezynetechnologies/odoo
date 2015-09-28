@@ -661,6 +661,7 @@ class hr_payslip(osv.osv):
         return result
 
     def onchange_employee_id(self, cr, uid, ids, date_from, date_to, employee_id=False, contract_id=False, context=None):
+	department_id = False
         empolyee_obj = self.pool.get('hr.employee')
         contract_obj = self.pool.get('hr.contract')
         worked_days_obj = self.pool.get('hr.payslip.worked_days')
@@ -694,9 +695,11 @@ class hr_payslip(osv.osv):
             return res
         ttyme = datetime.fromtimestamp(time.mktime(time.strptime(date_from, "%Y-%m-%d")))
         employee_id = empolyee_obj.browse(cr, uid, employee_id, context=context)
+	department_id = employee_id.department_id.id
         res['value'].update({
                     'name': _('Salary Slip of %s for %s') % (employee_id.name, tools.ustr(ttyme.strftime('%B-%Y'))),
-                    'company_id': employee_id.company_id.id
+                    'company_id': employee_id.company_id.id,
+		    'department_id' : department_id
         })
 
         if not context.get('contract', False):

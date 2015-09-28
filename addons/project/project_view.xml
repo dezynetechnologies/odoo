@@ -737,10 +737,10 @@
             <field name="model">project.billing.rate</field>
             <field name="arch" type="xml">
                 <tree string="Billing Rate">
-                        <field name="name"/>
                         <field name="role"/>
                         <field name="rate" />
-                        <field name="currency_id" groups="base.group_multi_currency"/>
+                        <!--field name="currency_id" groups="base.group_multi_currency"/-->
+                        <field name="currency_id"/>
                 </tree>
             </field>
         </record>
@@ -751,13 +751,13 @@
             <field name="arch" type="xml">
                 <form string="Billing Rate">
                     <group col="4">
-                        <field name="name" colspan="4"/>
                         <field name="role"/>
                     </group>
                     <group col="4">
                         <field name="rate" colspan="4"/>
-                        <field name="currency_id" groups="base.group_multi_currency"/>
-		            </group>
+                        <!--field name="currency_id" groups="base.group_multi_currency"/-->
+                        <field name="currency_id"/>
+		    </group>
                 </form>
             </field>
         </record>
@@ -785,13 +785,14 @@
             <field name="name">project.expenses.tree</field>
             <field name="model">project.expenses</field>
             <field name="arch" type="xml">
-                <tree string="Project Expenses">
+                <tree string="Common Costs">
                         <field name="name"/>
+                        <field name="nti_unit"/>
                         <field name="category"/>
                         <field name="date_from"/>
                         <field name="date_to"/>
                         <field name="amount"/>
-                        <field name="currency_id" groups="base.group_multi_currency"/>
+                        <field name="currency_id"/>
                 </tree>
             </field>
         </record>
@@ -800,9 +801,10 @@
             <field name="name">project.expense.form.tree</field>
             <field name="model">project.expenses</field>
             <field name="arch" type="xml">
-                <form string="Project Expenses">
+                <form string="Common Costs">
                     <group col="4">
-                        <field name="name" colspan="4"/>
+                        <field name="name"/>
+                        <field name="nti_unit"/>
                         <field name="category"/>
                     </group>
                     <group col="4">
@@ -812,8 +814,8 @@
                         	</div>
 		    </group>
                     <group col="4">
-                        <field name="amount" colspan="4"/>
-                        <field name="currency_id" groups="base.group_multi_currency"/>
+                        <field name="amount"/>
+                        <field name="currency_id"/>
 		    </group>
                 </form>
             </field>
@@ -821,7 +823,7 @@
 
 
         <record id="open_project_expenses_all" model="ir.actions.act_window">
-            <field name="name">Project Expenses</field>
+            <field name="name">Common Costs</field>
             <field name="res_model">project.expenses</field>
             <field name="view_type">form</field>
             <!-- <field name="domain">[]</field> -->
@@ -831,12 +833,125 @@
             <field name="context">{'search_default_Current': 1}</field> -->
             <field name="help" type="html">
                 <p class="oe_view_nocontent_create">
-                  Click to create Project Expenses.
+                  Click to create Common Costs.
                 </p><p>
                   Here you can create project expenses amortised at the level of a resource.
                 </p>
             </field>
         </record>
+
+       <record id="project_specific_expenses_tree" model="ir.ui.view">
+            <field name="name">project.specific.expenses.tree</field>
+            <field name="model">project.specific.expenses</field>
+            <field name="arch" type="xml">
+                <tree string="Specific Costs">
+                        <field name="project_id"/>
+                        <field name="category"/>
+                        <field name="date"/>
+                        <field name="exp_cost"/>
+                        <field name="exp_currency_id"/>
+                        <field name="billable_cost"/>
+                        <field name="bill_currency_id"/>
+                </tree>
+            </field>
+        </record>
+
+       <record id="project_specific_expenses_form" model="ir.ui.view">
+            <field name="name">project.specific.expense.form.tree</field>
+            <field name="model">project.specific.expenses</field>
+            <field name="arch" type="xml">
+                <form string="Specific Costs">
+                    <group col="4">
+                        <field name="project_id"/>
+                        <field name="category"/>
+                    </group>
+                    <group col="4">
+                        <field name="date"/>
+		    </group>
+                    <group col="4">
+                        <field name="exp_cost"/>
+                        <field name="exp_currency_id"/>
+		    </group>
+                    <group col="4">
+                        <field name="billable_cost"/>
+                        <field name="bill_currency_id"/>
+		    </group>
+                </form>
+            </field>
+        </record>
+
+       <record id="project_employee_expenses_tree" model="ir.ui.view">
+            <field name="name">project.employee.expenses.tree</field>
+            <field name="model">project.employee.expenses</field>
+            <field name="arch" type="xml">
+                <tree string="Employee Costs">
+                        <field name="employee_id"/>
+                        <field name="project_id"/>
+                        <field name="category"/>
+                        <field name="date"/>
+                        <field name="exp_cost"/>
+                        <field name="exp_currency_id"/>
+                        <field name="billable_cost"/>
+                        <field name="bill_currency_id"/>
+                </tree>
+            </field>
+        </record>
+
+       <record id="project_employee_expenses_form" model="ir.ui.view">
+            <field name="name">project.employee.expense.form.tree</field>
+            <field name="model">project.employee.expenses</field>
+            <field name="arch" type="xml">
+                <form string="Employee Costs">
+                    <group col="4">
+                        <field name="employee_id"/>
+                        <field name="project_id"/>
+                        <field name="category"/>
+                    </group>
+                    <group col="4">
+                        <field name="date"/>
+		    </group>
+                    <group col="4">
+                        <field name="exp_cost"/>
+                        <field name="exp_currency_id"/>
+		    </group>
+                    <group col="4">
+                        <field name="billable_cost"/>
+                        <field name="bill_currency_id"/>
+		    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="open_project_specific_expenses_all" model="ir.actions.act_window">
+            <field name="name">Specific Costs</field>
+            <field name="res_model">project.specific.expenses</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="project_specific_expenses_tree"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                  Click to create Specific Costs.
+                </p><p>
+                  Here you can create project specific expenses.
+                </p>
+            </field>
+        </record>
+
+        <record id="open_project_employee_expenses_all" model="ir.actions.act_window">
+            <field name="name">Employee Costs</field>
+            <field name="res_model">project.employee.expenses</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="project_employee_expenses_tree"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                  Click to create Employee Specific Costs.
+                </p><p>
+                  Here you can create employee expenes specific to a project.
+                </p>
+            </field>
+        </record>
+
 
        <record id="project_billing_rate_card_tree" model="ir.ui.view">
             <field name="name">project.billing.rate.card.tree</field>
@@ -911,7 +1026,9 @@
         <menuitem action="open_task_type_form" name="Task Stages" id="menu_task_types_view" parent="base.menu_project_config_project" sequence="2"/>
         <menuitem action="open_view_project_all" id="menu_projects" name="Projects" parent="menu_project_management" sequence="1"/>
 
-        <menuitem action="open_project_expenses_all" id="menu_project_expenses" name="Project Expenses" parent="menu_project_management" sequence="3"/>
+        <menuitem action="open_project_expenses_all" id="menu_project_expenses" name="Common Costs" parent="menu_project_management" sequence="3"/>
+        <menuitem action="open_project_specific_expenses_all" id="menu_project_specific_expenses" name="Specific Costs" parent="menu_project_management" sequence="4"/>
+        <menuitem action="open_project_employee_expenses_all" id="menu_project_employee_expenses" name="Employee Costs" parent="menu_project_management" sequence="5"/>
 
         <menuitem action="open_project_billing_rate_cards_all" id="menu_billing_cards" name="Billing Rate Cards" parent="menu_project_management" sequence="4"/>
 

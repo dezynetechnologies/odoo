@@ -168,6 +168,7 @@ class hr_timesheet_sheet(osv.osv):
         'name': fields.char('Note', select=1,
                             states={'confirm':[('readonly', True)], 'done':[('readonly', True)]}),
         'employee_id': fields.many2one('hr.employee', 'Employee', required=True),
+        'employee_no': fields.related('employee_id', 'employee_no', type="char", store=True, string="Employee No", required=False, readonly=True),
         'user_id': fields.related('employee_id', 'user_id', type="many2one", relation="res.users", store=True, string="User", required=False, readonly=True),#fields.many2one('res.users', 'User', required=True, select=1, states={'confirm':[('readonly', True)], 'done':[('readonly', True)]}),
         'date_from': fields.date('Date from', required=True, select=1, readonly=True, states={'new':[('readonly', False)]}),
         'date_to': fields.date('Date to', required=True, select=1, readonly=True, states={'new':[('readonly', False)]}),

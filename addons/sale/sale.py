@@ -34,6 +34,33 @@ class res_company(osv.Model):
         'sale_note': fields.text('Default Terms and Conditions', translate=True, help="Default terms and conditions for quotations."),
     }
 
+class sale_invoice(osv.osv):
+    _name = 'sale.invoice'
+    _description = 'Sale Invoices'
+
+    def _get_currency(self, cr, uid, ctx):
+        comp = self.pool.get('res.users').browse(cr,uid,uid).company_id
+        if not comp:
+            comp_id = self.pool.get('res.company').search(cr, uid, [])[0]
+            comp = self.pool.get('res.company').browse(cr, uid, comp_id)
+        return comp.currency_id.id
+
+    _columns = {
+        'number' : fields.char('Invoice Number',required=True),
+        'shipping_number' : fields.char('Shipping Invoice Number',required=True),
+        'amount':fields.integer('Invoice Amount'),
+        'date': fields.date('Invoice Date', required=True, select=1, readonly=False),
+        'currency_id' : fields.many2one('res.currency', "Currency", required=True,help="The currency the field is expressed in."),
+
+    }
+
+    _defaults = {
+       "currency_id": _get_currency,
+       "date" : lambda *a: time.strftime('%Y-%m-01'),
+    }
+
+
+
 class sale_order(osv.osv):
     _name = "sale.order"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
@@ -225,6 +252,7 @@ class sale_order(osv.osv):
         'project_id': fields.many2one('account.analytic.account', 'Contract / Analytic', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="The analytic account related to a sales order."),
 
         'order_line': fields.one2many('sale.order.line', 'order_id', 'Order Lines', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=True),
+        'sale_invoice_ids': fields.many2many('sale.invoice', 'book_keeping_sale_order_invoice_rel', 'order_id', 'invoice_id', 'Invoices', copy=False, help="This is the list of invoices that have been generated for this sales order. The same sales order may have been invoiced in several times (by line for example)."),
         'invoice_ids': fields.many2many('account.invoice', 'sale_order_invoice_rel', 'order_id', 'invoice_id', 'Invoices', readonly=True, copy=False, help="This is the list of invoices that have been generated for this sales order. The same sales order may have been invoiced in several times (by line for example)."),
         'invoiced_rate': fields.function(_invoiced_rate, string='Invoiced Ratio', type='float'),
         'invoiced': fields.function(_invoiced, string='Paid',
@@ -261,7 +289,12 @@ class sale_order(osv.osv):
         'first_level': fields.char('First Level Tracking'),
         'client_bu' : fields.char('Client BU'),
         'nti_bu' : fields.many2one('hr.department','NTI BU'),
+        'sales_loc': fields.char('Sales Location'),
         'po_no': fields.char('PO Number'),
+        'tax_category': fields.selection([
+            ('WT', 'WT'),
+            ('CT', 'CT')
+            ], 'Tax Category', help="Please select Tax Category."),
         'sales_location' : fields.char('Sales Location'),
         'delivery_due_date': fields.date('Delivery Due Date'),
         'actual_delivery_date': fields.date('Actual Delivery Date'),

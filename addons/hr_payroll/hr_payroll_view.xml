@@ -242,11 +242,11 @@
                         <div>
                             <field name="date_from" on_change="onchange_employee_id(date_from, date_to, employee_id, contract_id)" class="oe_inline"/> - <field name="date_to" class="oe_inline"/>
                         </div>
-                        <field name="contract_id" domain="[('employee_id','=',employee_id),('date_start','&lt;=',date_to),'|',('date_end','&gt;=',date_from),('date_end','=',False)]" on_change="onchange_contract_id(date_from, date_to, employee_id, contract_id)" context="{'default_employee_id': employee_id}"/>
-                        <field name="number"/>
-                        <field name="struct_id" attrs="{'required':[('contract_id','&lt;&gt;',False)]}"/>
-                        <field name="name"/>
-                        <field name="credit_note"/>
+                        <field name="contract_id" domain="[('employee_id','=',employee_id),('date_start','&lt;=',date_to),'|',('date_end','&gt;=',date_from),('date_end','=',False)]" on_change="onchange_contract_id(date_from, date_to, employee_id, contract_id)" context="{'default_employee_id': employee_id}" invisible="1"/>
+                        <field name="number" invisible="1"/>
+                        <field name="struct_id" attrs="{'required':[('contract_id','&lt;&gt;',False)]}" invisible="1"/>
+                        <field name="name" invisible="1"/>
+                        <field name="credit_note" invisible="1"/>
 			<field name="department_id"/>
 			<field name="employee_no"/>
 			<field name="basic_pay" invisible="1"/>
@@ -255,7 +255,7 @@
 			<field name="currency_id"/>
 			<field name="job_id"/>
                     </group>
-                    <notebook>
+                    <!--notebook>
                         <page string="Worked Days &amp; Inputs">
                             <separator string="Worked Days"/>
                             <field name="worked_days_line_ids">
@@ -351,7 +351,7 @@
                                 <field name="note" placeholder="Add an internal note..."/>
                             </div>
                        </page>
-                    </notebook>
+                    </notebook-->
                     </sheet>
                 </form>
             </field>

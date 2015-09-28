@@ -46,10 +46,8 @@ class project_expenses(osv.osv):
 
     _columns = {
         'name' : fields.char('Expense Name',required=True),
-        'category':fields.selection([('direct_cost','Other Direct Cost'),('direct_cost_nbec','Other Direct Cost(NBEC)'),
-                                     ('direct_cost_seiodc','Other Direct Cost(SEI-ODC)'),('sga','SGA'),
-                                     ('sga_nbec','SGA(NBEC)'),
-                                     ('sga_seiodc','SGA(SEI-ODC)')],string="Expense Type"),
+	'nti_unit' : fields.many2one('hr.department',"NTI Unit",required=True,help="The unit for which this expense has been created"),
+        'category':fields.selection([('direct_cost','Other Direct Cost'),('sga','SGA')],string="Expense Type"),
         'amount':fields.integer('Amount'),
         'date_from': fields.date('Date from', required=True, select=1, readonly=False),
         'date_to': fields.date('Date to', required=True, select=1, readonly=False),
@@ -62,6 +60,67 @@ class project_expenses(osv.osv):
        "date_from" : lambda *a: time.strftime('%Y-%m-01'),
        "date_to" : lambda *a: str(datetime.now() + relativedelta.relativedelta(months=+1, day=1, days=-1))[:10]
     }
+
+
+class project_employee_expenses(osv.osv):
+    _name = 'project.employee.expenses'
+    _description = 'Employee Expenses'
+
+    def _get_currency(self, cr, uid, ctx):
+        comp = self.pool.get('res.users').browse(cr,uid,uid).company_id
+        if not comp:
+            comp_id = self.pool.get('res.company').search(cr, uid, [])[0]
+            comp = self.pool.get('res.company').browse(cr, uid, comp_id)
+        return comp.currency_id.id
+
+    _columns = {
+	'project_id': fields.many2one('project.project', 'Project', help="Project to be accounted for this expense."),
+	'employee_id' : fields.many2one('hr.employee','Employee',help="Employee over whom this expense has been incurred."),
+        'category':fields.selection([('travel_cost','Travel Cost'),('other_cost','Other Cost')],string="Expense Type"),
+        'date': fields.date('Date', required=True, select=1, readonly=False),
+        'exp_cost':fields.integer('Actual Cost'),
+        'exp_currency_id' : fields.many2one('res.currency', "Currency", required=True,help="The currency the field is expressed in."),
+        'billable_cost':fields.integer('Billable Cost'),
+        'bill_currency_id' : fields.many2one('res.currency', "Currency", required=True,help="The currency the field is expressed in."),
+
+    }
+
+    _defaults = {
+       "exp_currency_id": _get_currency,
+       "bill_currency_id": _get_currency,
+       "date" : lambda *a: time.strftime('%Y-%m-01')
+    }
+
+
+class project_specific_expenses(osv.osv):
+    _name = 'project.specific.expenses'
+    _description = 'Project Expenses'
+
+    def _get_currency(self, cr, uid, ctx):
+        comp = self.pool.get('res.users').browse(cr,uid,uid).company_id
+        if not comp:
+            comp_id = self.pool.get('res.company').search(cr, uid, [])[0]
+            comp = self.pool.get('res.company').browse(cr, uid, comp_id)
+        return comp.currency_id.id
+
+    _columns = {
+	'project_id': fields.many2one('project.project', 'Project', help="Project to be accounted for this expense."),
+        'category':fields.selection([('software_cost','Software Cost'),('hardware_cost','Hardware Cost')],string="Expense Type"),
+        'date': fields.date('Date', required=True, select=1, readonly=False),
+        'exp_cost':fields.integer('Actual Cost'),
+        'exp_currency_id' : fields.many2one('res.currency', "Currency", required=True,help="The currency the field is expressed in."),
+        'billable_cost':fields.integer('Billable Cost'),
+        'bill_currency_id' : fields.many2one('res.currency', "Currency", required=True,help="The currency the field is expressed in."),
+
+    }
+
+    _defaults = {
+       "exp_currency_id": _get_currency,
+       "bill_currency_id": _get_currency,
+       "date" : lambda *a: time.strftime('%Y-%m-01')
+    }
+
+
 
 class project_billing_rate(osv.osv):
     _name = 'project.billing.rate'
@@ -82,7 +141,7 @@ class project_billing_rate(osv.osv):
     }
     _order = "id"
     _defaults = {
-        "currency_id": _get_currency
+        'currency_id': _get_currency
     }
 
 class project_billing_rate_card(osv.osv):
