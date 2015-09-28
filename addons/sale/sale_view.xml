@@ -109,15 +109,18 @@
                             <field name="date_order"/>
                             <field name="client_order_ref"/>
                             <field domain="[('type','=','sale')]" name="pricelist_id" groups="product.group_sale_pricelist" on_change="onchange_pricelist_id(pricelist_id,order_line)"/>
-                            <field name="currency_id" invisible="0"/>
+                            <field name="currency_id" invisible="1"/>
                         </group>
 			<group>
+                <field name="nti_bu"/>
+                <field name="client_bu"/>
                 <field name="first_level"/>
 			    <field name="po_no"/>
 			    <field name="delivery_due_date"/>
 			    <field name="actual_delivery_date"/>
 			    <field name="pre_po_date"/>
 			    <field name="po_date"/>
+                <field name="po_currency_id"/>
 			    <field name="pre_po_amount"/>
 			    <field name="po_amount"/>
 			    <field name="po_start"/>

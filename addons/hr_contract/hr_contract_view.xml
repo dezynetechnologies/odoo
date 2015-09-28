@@ -33,21 +33,21 @@
                         <field name="manager"/>
                     </xpath>
                     <xpath expr="//group[@name='active_group']" position="before">
-                        <group string="Contract">
+                        <!--group string="Contract">
                             <field name="medic_exam" string="Medical Exam"/>
                             <field name="vehicle"/>
                             <field name="vehicle_distance"/>
-                        </group>
+                        </group-->
                     </xpath>
-                    <field name="marital" position="after">
+                    <!--field name="marital" position="after">
                         <field name="children"/>
-                    </field>
-                    <field name="birthday" position="after">
+                    </field-->
+                    <!--field name="birthday" position="after">
                         <field name="place_of_birth"/>
                     </field>
                     <field name="bank_account_id" position="replace">
                         <field name="bank_account_id" context="{'display_partner':True}"/>
-                    </field>
+                    </field-->
                 </data>
             </field>
         </record>

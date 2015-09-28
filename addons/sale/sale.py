@@ -182,6 +182,12 @@ class sale_order(osv.osv):
         project_ids = project_obj.search(cr,uid, [('partner_id','=',partner_id)])
         return {'domain':{'project_id':[('id','in',project_ids)]}}
 
+    def _get_currency(self, cr, uid, ctx):
+        comp = self.pool.get('res.users').browse(cr,uid,uid).company_id
+        if not comp:
+            comp_id = self.pool.get('res.company').search(cr, uid, [])[0]
+            comp = self.pool.get('res.company').browse(cr, uid, comp_id)
+        return comp.currency_id.id
 
     _columns = {
         'name': fields.char('Order Reference', required=True, copy=False,
@@ -253,12 +259,15 @@ class sale_order(osv.osv):
         'procurement_group_id': fields.many2one('procurement.group', 'Procurement group', copy=False),
         'product_id': fields.related('order_line', 'product_id', type='many2one', relation='product.product', string='Product'),
         'first_level': fields.char('First Level Tracking'),
+        'client_bu' : fields.char('Client BU'),
+        'nti_bu' : fields.many2one('hr.department','NTI BU'),
         'po_no': fields.char('PO Number'),
         'sales_location' : fields.char('Sales Location'),
         'delivery_due_date': fields.date('Delivery Due Date'),
         'actual_delivery_date': fields.date('Actual Delivery Date'),
         'pre_po_date': fields.date('Pre-PO Date'),
         'po_date': fields.date('PO Date'),
+        'po_currency_id' : fields.many2one('res.currency', "Currency", required=True,help="The currency the field is expressed in."),
         'po_amount': fields.integer('PO Amount'),
         'pre_po_amount': fields.integer('Pre-PO Amount'),
         'pm_user_id': fields.many2one('res.users', 'Project Manager'),
@@ -274,6 +283,7 @@ class sale_order(osv.osv):
 
     _defaults = {
         'date_order': fields.datetime.now,
+        "po_currency_id": _get_currency,
         'order_policy': 'manual',
         'company_id': _get_default_company,
         'state': 'draft',

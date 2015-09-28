@@ -181,6 +181,9 @@ class hr_employee(osv.osv):
             result[obj.id] = tools.image_get_resized_images(obj.image)
         return result
 
+    def _get_billable(self, cr, uid, context=None):
+        return True
+
     def _set_image(self, cr, uid, id, name, value, args, context=None):
         return self.write(cr, uid, [id], {'image': tools.image_resize_image_big(value)}, context=context)
 
@@ -232,6 +235,7 @@ class hr_employee(osv.osv):
         'passport_id': fields.char('Passport No'),
         'employee_no': fields.char('Employee No'),
         'doj': fields.date("Date of Joining"),
+        'doe': fields.date("Date of Exit"),
         'color': fields.integer('Color Index'),
         'billable' : fields.boolean('Billable', help="If the billable field is set to False, it will allow you to exclude this resource from utilisation calculations."),
         'city': fields.related('address_id', 'city', type='char', string='City'),
@@ -244,8 +248,8 @@ class hr_employee(osv.osv):
         return tools.image_resize_image_big(open(image_path, 'rb').read().encode('base64'))
 
     defaults = {
+        'billable': True,
         'active': 1,
-        'billable': 1,
         'image': _get_default_image,
         'color': 0,
     }

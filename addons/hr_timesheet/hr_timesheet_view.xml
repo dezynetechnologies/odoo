@@ -164,10 +164,10 @@
             <field name="inherit_id" ref="hr.view_employee_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//group[@name='active_group']" position="before">
-                    <group string="Timesheets">
+                    <!--group string="Timesheets">
                         <field name="product_id" domain="[('type','=','service')]"/>
                         <field name="journal_id"/>
-                    </group>
+                    </group-->
                 </xpath>
             </field>
         </record>

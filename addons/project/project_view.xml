@@ -114,7 +114,8 @@
                                     attrs="{'readonly':[('state','in',['close', 'cancelled'])]}"
                                     context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'project.group_project_manager']}"/>
                             <newline/>
-                            <field name="partner_id" on_change="onchange_partner_id(partner_id)" string="Customer"/>
+                            <!--field name="partner_id" on_change="onchange_partner_id(partner_id)" string="Customer"/-->
+                            <field name="partner_id" on_change="onchange_partner_id(partner_id, context)" domain="[('customer','=',True)]" context="{'search_default_customer':1, 'show_address': 1}" options='{"always_reload": True}'/>
 			    <field name="sap_project_code"/>
 			    <field name="department_id"/>
                 <field name="date_start"/>
