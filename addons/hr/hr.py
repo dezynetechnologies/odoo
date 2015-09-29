@@ -204,7 +204,7 @@ class hr_employee(osv.osv):
         'bank_account_id': fields.many2one('res.partner.bank', 'Bank Account Number', domain="[('partner_id','=',address_home_id)]", help="Employee bank salary account"),
         'work_phone': fields.char('Work Phone', readonly=False),
         'mobile_phone': fields.char('Work Mobile', readonly=False),
-        'work_email': fields.char('Work Email', size=240),
+        'work_email': fields.char('Work Email', size=240,required=True),
         'work_location': fields.char('Office Location'),
         'notes': fields.text('Notes'),
         'parent_id': fields.many2one('hr.employee', 'Manager'),
@@ -233,29 +233,32 @@ class hr_employee(osv.osv):
                  "resized as a 64x64px image, with aspect ratio preserved. "\
                  "Use this field anywhere a small image is required."),
         'passport_id': fields.char('Passport No'),
-        'employee_no': fields.char('Employee No'),
+        'employee_no': fields.char('Employee No',required=True,copy=False),
         'emp_band': fields.char('Employee Band'),
         'emp_sband': fields.char('Employee Sub-Band'),
         'doj': fields.date("Date of Joining"),
         'doe': fields.date("Date of Exit"),
         'color': fields.integer('Color Index'),
-        'billable' : fields.boolean('Billable', help="If the billable field is set to False, it will allow you to exclude this resource from utilisation calculations."),
+        'billable' : fields.boolean('Billable', required=True, help="If the billable field is set to False, it will allow you to exclude this resource from utilisation calculations."),
         'city': fields.related('address_id', 'city', type='char', string='City'),
         'login': fields.related('user_id', 'login', type='char', string='Login', readonly=1),
         'last_login': fields.related('user_id', 'date', type='datetime', string='Latest Connection', readonly=1),
     }
+    _sql_constraints = [
+        ('employee_no_uniq', 'unique(employee_no)', 'Employee no has to be unique!'),
+    ]
+
 
     def _get_default_image(self, cr, uid, context=None):
         image_path = get_module_resource('hr', 'static/src/img', 'default_image.png')
         return tools.image_resize_image_big(open(image_path, 'rb').read().encode('base64'))
 
-    defaults = {
-        'billable': True,
+    _defaults = {
+        'billable': 1,
         'active': 1,
         'image': _get_default_image,
         'color': 0,
     }
-
     def _broadcast_welcome(self, cr, uid, employee_id, context=None):
         """ Broadcast the welcome message to all users in the employee company. """
         employee = self.browse(cr, uid, employee_id, context=context)

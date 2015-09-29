@@ -290,7 +290,7 @@ class sale_order(osv.osv):
         'client_bu' : fields.char('Client BU'),
         'nti_bu' : fields.many2one('hr.department','NTI BU'),
         'sales_loc': fields.char('Sales Location'),
-        'po_no': fields.char('PO Number'),
+        'po_no': fields.char('PO Number',required=True,copy=False),
         'tax_category': fields.selection([
             ('WT', 'WT'),
             ('CT', 'CT')

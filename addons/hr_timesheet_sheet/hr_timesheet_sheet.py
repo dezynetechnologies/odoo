@@ -91,7 +91,9 @@ class hr_timesheet_sheet(osv.osv):
         if vals.get('attendances_ids'):
             # If attendances, we sort them by date asc before writing them, to satisfy the alternance constraint
             vals['attendances_ids'] = self.sort_attendances(cr, uid, vals['attendances_ids'], context=context)
-        return super(hr_timesheet_sheet, self).create(cr, uid, vals, context=context)
+        new_id = super(hr_timesheet_sheet, self).create(cr, uid, vals, context=context)
+        self.pool.get('project.project').write(cr, uid,[vals['project_id']],{'resource_allocations':[(4,new_id)]},context = context)
+        return new_id
 
     def write(self, cr, uid, ids, vals, context=None):
         if 'employee_id' in vals:

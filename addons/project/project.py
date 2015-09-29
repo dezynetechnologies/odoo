@@ -474,11 +474,11 @@ class project(osv.osv):
              ('cancelled', 'Cancelled')], 'Project Status', copy=False),
         # 'sale_orders': fields.one2many('sale.order', 'po_project_id', 'Sale Orders'),
         #'sale_orders': fields.many2many('sale.order', 'project_sale_order_rel', 'project_id', 'sales_id',
-        'sale_orders': fields.many2many('sale.order', string="Sale Orders", states={'close': [('readonly', True)], 'cancelled': [('readonly', True)]}),
+        'sale_orders': fields.many2many('sale.order', string="Sale Orders", copy=False, states={'close': [('readonly', True)], 'cancelled': [('readonly', True)]}),
         # 'resource_allocations': fields.one2many('hr_timesheet_sheet.sheet','project_id','Resource Allocation Sheet'),
         #'resource_allocations': fields.many2many('hr_timesheet_sheet.sheet', 'project_timesheet_rel', 'project_id', 'timesheet_id',
         'resource_allocations': fields.many2many('hr_timesheet_sheet.sheet',
-                                                 string = "Resource Allocation Sheet",states={'close': [('readonly', True)], 'cancelled': [('readonly', True)]}),
+                                                 string = "Resource Allocation Sheet", copy=False,states={'close': [('readonly', True)], 'cancelled': [('readonly', True)]}),
         # 'sale_orders': fields.many2one('sale.order', 'Sale Orders'),
         'department_id': fields.many2one('hr.department', 'Department'),
         'doc_count': fields.function(

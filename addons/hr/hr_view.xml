@@ -50,7 +50,7 @@
                                         <field name="department_id" on_change="onchange_department_id(department_id)"/>
                                         <field name="job_id"/>
                                         <field name="emp_band"/>
-                                        <field name="emp_sband"/>
+                                        <field name="emp_sband" invisible="1"/>
                                         <field name="parent_id" invisible="1"/>
                                         <field name="coach_id" invisible="1"/>
                                     </group>
@@ -59,7 +59,7 @@
                                         <field name="user_id" on_change="onchange_user(user_id)" string="Related User"
                                             context="{'default_groups_ref': ['base.group_user']}"/>
                                     </group>
-                                    <group string="Billable">
+                                    <group string="Billable" name="active_group">
                                         <field name="billable"/>
                                     </group>
                                     <group string="Active" name="active_group">
@@ -123,12 +123,15 @@
             <field name="arch" type="xml">
                 <tree string="Employees">
                     <field name="name"/>
-                    <field name="work_phone"/>
+                    <field name="employee_no"/>
+                    <field name="work_phone" invisible="1"/>
                     <field name="work_email"/>
-                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="company_id" groups="base.group_multi_company" invisible="1"/>
                     <field name="department_id"/>
                     <field name="job_id"/>
-                    <field name="parent_id"/>
+                    <field name="billable"/>
+                    <field name="active"/>
+                    <field name="parent_id" invisible="1"/>
                     <field name="coach_id" invisible="1"/>
                 </tree>
             </field>
@@ -229,7 +232,7 @@
             <field name="name">Employees</field>
             <field name="res_model">hr.employee</field>
             <field name="view_type">form</field>
-            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_mode">tree,kanban,form</field>
             <field name="domain">[]</field>
             <field name="context">{}</field>
             <field name="view_id" eval="False"/>
