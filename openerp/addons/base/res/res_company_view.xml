@@ -75,6 +75,7 @@
                             <group>
                                 <group name="account_grp" string="Accounting">
                                     <field name="currency_id"/>
+                                    <field name="billing_currency_id"/>
                                 </group>
                             </group>
                         </page>

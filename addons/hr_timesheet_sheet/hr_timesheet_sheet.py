@@ -170,7 +170,7 @@ class hr_timesheet_sheet(osv.osv):
         'name': fields.char('Note', select=1,
                             states={'confirm':[('readonly', True)], 'done':[('readonly', True)]}),
         'employee_id': fields.many2one('hr.employee', 'Employee', required=True),
-        'employee_no': fields.related('employee_id', 'employee_no', type="char", store=True, string="Employee No", required=False, readonly=True),
+        'employee_no': fields.related('employee_id', 'employee_no', type="char", store=True, string="Employee No", required=True, readonly=False),
         'user_id': fields.related('employee_id', 'user_id', type="many2one", relation="res.users", store=True, string="User", required=False, readonly=True),#fields.many2one('res.users', 'User', required=True, select=1, states={'confirm':[('readonly', True)], 'done':[('readonly', True)]}),
         'date_from': fields.date('Date from', required=True, select=1, readonly=True, states={'new':[('readonly', False)]}),
         'date_to': fields.date('Date to', required=True, select=1, readonly=True, states={'new':[('readonly', False)]}),
@@ -321,11 +321,13 @@ class hr_timesheet_sheet(osv.osv):
     def onchange_employee_id(self, cr, uid, ids, employee_id, context=None):
         department_id =  False
         user_id = False
+        employee_no = '0'
         if employee_id:
             empl_id = self.pool.get('hr.employee').browse(cr, uid, employee_id, context=context)
             department_id = empl_id.department_id.id
+            employee_no = empl_id.employee_no
             user_id = empl_id.user_id.id
-        return {'value': {'department_id': department_id, 'user_id': user_id,}}
+        return {'value': {'department_id': department_id, 'user_id': user_id, 'employee_no' : employee_no}}
 
     # ------------------------------------------------
     # OpenChatter methods and notifications

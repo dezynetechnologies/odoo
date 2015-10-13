@@ -191,7 +191,8 @@
                 <tree colors="blue:state in ('confirm','hr_check','accont_check');black:state == 'new';gray:state == 'cancel'" string="Payslips">
                     <!--<field name="number"/> -->
                     <field name="employee_id"/>
-                    <field name="name"/>
+                    <field name="employee_no"/>
+                    <!--field name="name"/-->
                     <field name="date_from"/>
                     <field name="date_to"/>
                     <field name="basic_pay" invisible="1"/>

@@ -131,7 +131,7 @@ class project_billing_rate(osv.osv):
         if not comp:
             comp_id = self.pool.get('res.company').search(cr, uid, [])[0]
             comp = self.pool.get('res.company').browse(cr, uid, comp_id)
-        return comp.currency_id.id
+        return comp.billing_currency_id.id
 
     _columns = {
         'name' : fields.char('Name',required=True),

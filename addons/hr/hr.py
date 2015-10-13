@@ -391,7 +391,7 @@ class hr_department(osv.osv):
         'name': fields.char('Department Name', required=True),
         'complete_name': fields.function(_dept_name_get_fnc, type="char", string='Name'),
         'company_id': fields.many2one('res.company', 'Company', select=True, required=False),
-        'parent_id': fields.many2one('hr.department', 'Parent Department', select=True),
+        'parent_id': fields.many2one('hr.department', 'Parent Department/NTI Unit', select=True),
         'child_ids': fields.one2many('hr.department', 'parent_id', 'Child Departments'),
         'manager_id': fields.many2one('hr.employee', 'Manager'),
         'member_ids': fields.one2many('hr.employee', 'department_id', 'Members', readonly=True),

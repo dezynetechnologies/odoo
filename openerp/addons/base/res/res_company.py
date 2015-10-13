@@ -132,6 +132,7 @@ class res_company(osv.osv):
             'res.partner': (_get_companies_from_partner, ['image'], 10),
         }),
         'currency_id': fields.many2one('res.currency', 'Currency', required=True),
+        'billing_currency_id': fields.many2one('res.currency', 'Billing Currency', required=True),
         'currency_ids': fields.one2many('res.currency', 'company_id', 'Currency'),
         'user_ids': fields.many2many('res.users', 'res_company_users_rel', 'cid', 'user_id', 'Accepted Users'),
         'account_no':fields.char('Account No.'),
