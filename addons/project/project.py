@@ -73,9 +73,18 @@ class project_employee_expenses(osv.osv):
             comp = self.pool.get('res.company').browse(cr, uid, comp_id)
         return comp.currency_id.id
 
+    def onchange_employee_id(self, cr, uid, ids, employee_id, context=None):
+        employee_no = '0'
+        if employee_id:
+            empl_id = self.pool.get('hr.employee').browse(cr, uid, employee_id, context=context)
+            employee_no = empl_id.employee_no
+        return {'value': {'employee_no' : employee_no}}
+
+
     _columns = {
-	'project_id': fields.many2one('project.project', 'Project', help="Project to be accounted for this expense."),
-	'employee_id' : fields.many2one('hr.employee','Employee',help="Employee over whom this expense has been incurred."),
+	    'project_id': fields.many2one('project.project', 'Project', help="Project to be accounted for this expense."),
+	    'employee_id' : fields.many2one('hr.employee','Employee',help="Employee over whom this expense has been incurred."),
+        'employee_no': fields.related('employee_id', 'employee_no', type="char", store=True, string="Employee No", required=True, readonly=False),
         'category':fields.selection([('travel_cost','Travel Cost'),('other_cost','Other Cost')],string="Expense Type"),
         'date': fields.date('Date', required=True, select=1, readonly=False),
         'exp_cost':fields.integer('Actual Cost'),

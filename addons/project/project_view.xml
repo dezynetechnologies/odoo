@@ -887,6 +887,7 @@
             <field name="arch" type="xml">
                 <tree string="Employee Costs">
                         <field name="employee_id"/>
+                        <field name="employee_no"/>
                         <field name="project_id"/>
                         <field name="category"/>
                         <field name="date"/>
@@ -904,7 +905,8 @@
             <field name="arch" type="xml">
                 <form string="Employee Costs">
                     <group col="4">
-                        <field name="employee_id"/>
+                        <field name="employee_id" on_change="onchange_employee_id(employee_id)"/>
+                        <field name="employee_no"/>
                         <field name="project_id"/>
                         <field name="category"/>
                     </group>
