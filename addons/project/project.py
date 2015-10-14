@@ -46,7 +46,7 @@ class project_expenses(osv.osv):
 
     _columns = {
         'name' : fields.char('Expense Name',required=True),
-	'nti_unit' : fields.many2one('hr.department',"NTI Unit",required=True,help="The unit for which this expense has been created"),
+	    'nti_unit' : fields.many2one('hr.department',"NTI Unit",required=True,help="The unit for which this expense has been created"),
         'category':fields.selection([('direct_cost','Other Direct Cost'),('sga','SGA')],string="Expense Type"),
         'amount':fields.integer('Amount'),
         'date_from': fields.date('Date from', required=True, select=1, readonly=False),

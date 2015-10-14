@@ -464,6 +464,7 @@
                             <field name="manager_id"/>
                             <field name="parent_id"/>
                             <field name="company_id" widget="selection" groups="base.group_multi_company"/>
+                            <field name="is_unit"/>
                         </group>
                     </sheet>
                 </form>

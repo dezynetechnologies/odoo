@@ -397,10 +397,12 @@ class hr_department(osv.osv):
         'member_ids': fields.one2many('hr.employee', 'department_id', 'Members', readonly=True),
         'jobs_ids': fields.one2many('hr.job', 'department_id', 'Jobs'),
         'note': fields.text('Note'),
+        'is_unit' : fields.boolean('Is NTI Unit',required=True)
     }
 
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'hr.department', context=c),
+        'is_unit' : False,
     }
 
     def _check_recursion(self, cr, uid, ids, context=None):
