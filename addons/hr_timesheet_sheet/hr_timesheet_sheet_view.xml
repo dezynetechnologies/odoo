@@ -84,39 +84,44 @@
                         </button>
                     </div>
                     <div class="oe_title">
-                        <label for="employee_id" class="oe_edit_only"/>
-                        <h1><field name="employee_id" on_change="onchange_employee_id(employee_id)" class="oe_inline"/></h1>
-                        <!--field name="user_id" invisible="1"/-->
-                        <label for="employee_no" class="oe_edit_only"/>
-                        <field name="employee_no" class="oe_inline"/>
+                        <label for="project_id" class="oe_edit_only"/>
+                        <h1><field name="project_id" on_change="onchange_project_id(project_id)" class="oe_inline"/></h1>
                     </div>
                     <group>
-
-                        <group>
+                        <group string="Time Period">
                             <label for="date_from" string="Timesheet Period"/>
                             <div><field name="date_from" class="oe_inline"/> to <field name="date_to" class="oe_inline"/></div>
                             <field name="name" invisible="1"/>
-                            <field name="department_id" invisible="0"/>
+
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
+                        <group string="Allocation Details">
+			                <field name="allocation_perc"/>
+                            <field name="geography"/>
+                        </group>
+                        <group string="Employee Details">
+                            <field name="employee_id" on_change="onchange_employee_id(employee_id)"/>
+                        <!--field name="user_id" invisible="1"/-->
+                            <field name="employee_no"/>
+                            <field name="department_id"/>
+                            <field name="second_level"/>
+                        </group>
+
+
                         <group groups="base.group_hr_attendance">
                             <field name="total_attendance" widget="float_time"/>
                             <field name="total_timesheet" widget="float_time"/>
                             <field name="total_difference" widget="float_time"/>
                         </group>
-			        <group>
-			    <field name="project_id"/>
-                <field name="second_level"/>
-                <field name="billing_rate_card_id"/>
-			    <field name="project_role"/>
-			    <field name="geography"/>
-			    <field name="allocation_perc"/>
-            </group>
-			<group>
-			    <field name="billed_status"/>
-			    <field name="billing_perc"/>
-			    <field name="monthly_billing_rate"/>
-            </group>
+
+			            <group string="Billing Details">
+                            <field name="billed_status"/>
+                            <field name="billing_rate_card_id" on_change="onchange_rate_card(billing_rate_card_id)"/>
+			                <field name="project_role" on_change="onchange_project_role(project_role)"/>
+                            <field name="monthly_billing_rate"/>
+                            <field name="currency_id"/>
+			                <field name="billing_perc"/>
+                        </group>
                     </group>
                     <!--notebook>
                         <page string="Summary">

@@ -101,6 +101,10 @@
                                 </group>
                             </page>
                             <page string="HR Settings" groups="base.group_hr_user">
+                                <group string="Skills">
+                                    <field name="primary_skill"/>
+                                    <field name="secondary_skill"/>
+                                </group>
                                 <!--group>
                                     <group string="Active" name="active_group">
                                         <field name="active"/>

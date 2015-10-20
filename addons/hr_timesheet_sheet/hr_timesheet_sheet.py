@@ -166,6 +166,16 @@ class hr_timesheet_sheet(osv.osv):
             for sheet_id in ids
         }
 
+    def _get_project_role_selection(self, cr, uid, context=None):
+        """ Overriden in project_issue to offer more options """
+        print uid
+        #print ids
+        #for sheet in self.browse(cr, uid, context=context):
+        #    print sheet.employee_id
+        return [('pm', "Project Manager"),('eg',"Engineer")]
+
+    _project_role_selection = lambda self, *args, **kwargs: self._get_project_role_selection(*args, **kwargs)
+
     _columns = {
         'name': fields.char('Note', select=1,
                             states={'confirm':[('readonly', True)], 'done':[('readonly', True)]}),
@@ -196,18 +206,22 @@ class hr_timesheet_sheet(osv.osv):
         'period_ids': fields.one2many('hr_timesheet_sheet.sheet.day', 'sheet_id', 'Period', readonly=True),
         'account_ids': fields.one2many('hr_timesheet_sheet.sheet.account', 'sheet_id', 'Analytic accounts', readonly=True),
         'company_id': fields.many2one('res.company', 'Company'),
-        'department_id':fields.many2one('hr.department','Department'),
+        'department_id':fields.many2one('hr.department','Department',required=True),
         'timesheet_activity_count': fields.function(_count_all, type='integer', string='Timesheet Activities', multi=True),
         'attendance_count': fields.function(_count_all, type='integer', string="Attendances", multi=True),
-        'project_id': fields.many2one('project.project','Project'),
+        'project_id': fields.many2one('project.project','Project',required=True),
         'second_level': fields.char('Second Level Tracking'),
         'geography':fields.selection([('onsite','onsite'),('offshore','offshore')],'Geography'),
         'billed_status':fields.selection([('billed','billed'),('unbilled','unbilled')],'Billing Status'),
         'billing_perc': fields.integer('Billing',help="Billing percentage (0 to 100)"),
         'allocation_perc': fields.integer('Allocation',help="Allocation percentage (0 to 100) for the period"),
-        'monthly_billing_rate':fields.integer('Monthly Billing Rate',help="Monthly billing rate for the given employee and period."),
-        'project_role' : fields.char('Project Role'),
-        'billing_rate_card_id' : fields.many2one('project.billing.rate.card','Billing Rate Card')
+        'monthly_billing_rate':fields.integer('Monthly Billing Rate',help="Monthly billing rate for the given employee and period.",required=True),
+        'currency_id' : fields.many2one('res.currency', "Currency", required=True, help="The currency the field is expressed in."),
+        #'project_role' : fields.selection(_project_role_selection,'Project Role',required=True),
+        'project_role' : fields.many2one('project.billing.rate','Project Role',required=True),
+        'billing_rate_card_id' : fields.many2one('project.billing.rate.card','Billing Rate Card',required=True),
+        #'project_role' : fields.related('billing_rate_card_id', 'billing_table', type="one2many", relation="project.billing.rate", store=True, string="Project Role", required=True),
+
     }
 
     def _default_date_from(self, cr, uid, context=None):
@@ -243,7 +257,9 @@ class hr_timesheet_sheet(osv.osv):
         'employee_id': _default_employee,
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'hr_timesheet_sheet.sheet', context=c),
         'allocation_perc' : 100,
-        'billing_perc':100
+        'billing_perc':100,
+        'geography' : 'offshore',
+        'billed_status' : 'billed'
     }
 
     def _sheet_date(self, cr, uid, ids, forced_user_id=False, context=None):
@@ -328,6 +344,31 @@ class hr_timesheet_sheet(osv.osv):
             employee_no = empl_id.employee_no
             user_id = empl_id.user_id.id
         return {'value': {'department_id': department_id, 'user_id': user_id, 'employee_no' : employee_no}}
+
+    def onchange_project_role(self, cr, uid, ids, project_role, context=None):
+        monthly_billing_rate = 0
+        currency_id = False
+        if project_role:
+            billing_rate_id = self.pool.get('project.billing.rate').browse(cr,uid,project_role,context=context)
+            monthly_billing_rate = billing_rate_id.rate
+            currency_id = billing_rate_id.currency_id
+        return {'value': {'monthly_billing_rate': monthly_billing_rate,'currency_id' : currency_id}}
+
+    def onchange_project_id(self, cr, uid, ids, project_id, context=None):
+        billing_rate_card_id = False
+        if project_id:
+            proj_id = self.pool.get('project.project').browse(cr,uid,project_id,context=context)
+            billing_rate_card_id = proj_id.billing_rate_card_id.id
+        return {'value':{'billing_rate_card_id':billing_rate_card_id}}
+
+    def onchange_rate_card(self, cr, uid, ids, billing_rate_card_id , context=None):
+        res = []
+        rate_obj = self.pool.get('project.billing.rate')
+        res = rate_obj.search(cr,uid,[('rate_card_id','=',billing_rate_card_id)],context=context)
+        return {
+                'domain': {
+                      'project_role': [('id', 'in', res)],
+             } }
 
     # ------------------------------------------------
     # OpenChatter methods and notifications

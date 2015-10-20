@@ -114,7 +114,8 @@ class project_specific_expenses(osv.osv):
 
     _columns = {
 	'project_id': fields.many2one('project.project', 'Project', help="Project to be accounted for this expense."),
-        'category':fields.selection([('software_cost','Software Cost'),('hardware_cost','Hardware Cost')],string="Expense Type"),
+        #'category':fields.selection([('software_cost','Software Cost'),('hardware_cost','Hardware Cost')],string="Expense Type"),
+        'category' : fields.char('Expense Type', required=True),
         'date': fields.date('Date', required=True, select=1, readonly=False),
         'exp_cost':fields.integer('Actual Cost'),
         'exp_currency_id' : fields.many2one('res.currency', "Currency", required=True,help="The currency the field is expressed in."),
@@ -142,11 +143,12 @@ class project_billing_rate(osv.osv):
             comp = self.pool.get('res.company').browse(cr, uid, comp_id)
         return comp.billing_currency_id.id
 
+
     _columns = {
-        'name' : fields.char('Name',required=True),
-        'role' : fields.char('Project Role'),
+        'name' : fields.char('Project Role'),
         'rate': fields.integer('Project Role Rate'),
-        'currency_id' : fields.many2one('res.currency', "Currency", required=True, help="The currency the field is expressed in."),
+        'rate_card_id' : fields.many2one('project.billing.rate.card',string="Billing Rate Card"),
+        'currency_id' : fields.many2one('res.currency', "Currency", required=True, help="The currency the field is expressed in.")
     }
     _order = "id"
     _defaults = {
@@ -159,7 +161,8 @@ class project_billing_rate_card(osv.osv):
     _columns = {
         'name' : fields.char('Billing Rate Card Name',required=True),
         'project_ids': fields.many2many('project.project', string="Projects"),
-        'billing_table': fields.many2many('project.billing.rate','project_billing_rate_card_rel','card_id','rate_id',string="Billing Table"),
+        'billing_table' : fields.one2many('project.billing.rate','rate_card_id',"Billing Table")
+        #'billing_table': fields.many2many('project.billing.rate','project_billing_rate_card_rel','card_id','rate_id',string="Billing Table")
     }
     _order = "id"
     _defaults = {
@@ -459,7 +462,7 @@ class project(osv.osv):
                                          "with Tasks (or optionally Issues if the Issue Tracker module is installed)."),
         'alias_model': fields.selection(_alias_models, "Alias Model", select=True, required=True,
                                         help="The kind of document created when an email is received on this project's email alias"),
-        'privacy_visibility': fields.selection(_visibility_selection, 'Privacy / Visibility', required=True,
+        'privacy_visibility': fields.selection( _visibility_selection, 'Privacy / Visibility', required=True,
                                                help="Holds visibility of the tasks or issues that belong to the current project:\n"
                                                     "- Public: everybody sees everything; if portal is activated, portal users\n"
                                                     "   see all tasks or issues; if anonymous portal is activated, visitors\n"
@@ -490,6 +493,7 @@ class project(osv.osv):
                                                  string = "Resource Allocation Sheet", copy=False,states={'close': [('readonly', True)], 'cancelled': [('readonly', True)]}),
         # 'sale_orders': fields.many2one('sale.order', 'Sale Orders'),
         'department_id': fields.many2one('hr.department', 'Department'),
+        'billing_rate_card_id' : fields.many2one('project.billing.rate.card','Billing Rate Card',required=True),
         'doc_count': fields.function(
             _get_attached_docs, string="Number of documents attached", type='integer'
         )

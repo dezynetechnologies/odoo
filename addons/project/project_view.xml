@@ -116,11 +116,12 @@
                             <newline/>
                             <!--field name="partner_id" on_change="onchange_partner_id(partner_id)" string="Customer"/-->
                             <field name="partner_id" on_change="onchange_partner_id(partner_id, context)" domain="[('customer','=',True)]" context="{'search_default_customer':1, 'show_address': 1}" options='{"always_reload": True}'/>
-			    <field name="sap_project_code"/>
-			    <field name="department_id"/>
-                <field name="date_start"/>
-                <field name="date" string="End Date"/>
-			    <field name="project_status"/>
+			                <field name="sap_project_code"/>
+			                <field name="department_id"/>
+                            <field name="date_start"/>
+                            <field name="date" string="End Date"/>
+			                <field name="project_status"/>
+                            <field name="billing_rate_card_id"/>
                         </group>
                             <p attrs="{'invisible': [('analytic_account_id','=',False)]}">
                                 To invoice or setup invoicing and renewal options, go to the related contract:
@@ -737,7 +738,7 @@
             <field name="model">project.billing.rate</field>
             <field name="arch" type="xml">
                 <tree string="Billing Rate">
-                        <field name="role"/>
+                        <field name="name"/>
                         <field name="rate" />
                         <!--field name="currency_id" groups="base.group_multi_currency"/-->
                         <field name="currency_id"/>
@@ -751,7 +752,7 @@
             <field name="arch" type="xml">
                 <form string="Billing Rate">
                     <group col="4">
-                        <field name="role"/>
+                        <field name="name"/>
                     </group>
                     <group col="4">
                         <field name="rate" colspan="4"/>
