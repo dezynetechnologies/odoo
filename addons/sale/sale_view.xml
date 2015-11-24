@@ -60,7 +60,7 @@
             <field name="arch" type="xml">
                 <tree string="Quotation" fonts="bold:message_unread==True" colors="grey:state=='cancel';blue:state in ('waiting_date','manual');red:state in ('invoice_except','shipping_except')">
                     <field name="message_unread" invisible="1"/>
-                    <field name="name" string="Quotation Number"/>
+                    <field name="name" string="Order Number"/>
                     <field name="date_order"/>
                     <field name="partner_id"/>
                     <field name="user_id"/>
@@ -123,14 +123,14 @@
                         <button name="%(action_view_sale_advance_payment_inv)d" string="Create Invoice"
                             type="action" states="manual" class="oe_highlight" groups="base.group_user"/>
                         <button name="copy_quotation" states="cancel" string="New Copy of Quotation" type="object"/>
-                        <button name="cancel" states="draft,sent" string="Cancel Quotation" groups="base.group_user"/>
+                        <button name="cancel" states="draft,sent" string="Cancel" groups="base.group_user"/>
                         <button name="action_cancel" states="manual,progress" string="Cancel Order" type="object" groups="base.group_user"/>
                         <button name="invoice_cancel" states="invoice_except" string="Cancel Order" groups="base.group_user"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,sent,progress,done" statusbar_colors='{"invoice_except":"red","waiting_date":"blue"}'/>
                 </header>
                 <sheet>
                     <h1>
-                        <label string="Quotation " attrs="{'invisible': [('state','not in',('draft','sent'))]}"/>
+                        <label string="Order" attrs="{'invisible': [('state','not in',('draft','sent'))]}"/>
                         <label string="Sales Order " attrs="{'invisible': [('state','in',('draft','sent'))]}"/>
                         <field name="name" class="oe_inline" readonly="1"/>
                     </h1>
@@ -150,6 +150,7 @@
 			<group>
                 	    <field name="nti_bu"/>
                 	    <field name="client_bu"/>
+                        <field name="client_div"/>
                 	    <field name="sales_loc"/>
                             <field name="first_level"/>
 			    <field name="po_no"/>
@@ -170,7 +171,13 @@
 			<group>
 			    <field name="user_id"/>
 			    <field name="pm_user_id"/>
+                <field name="incharge_nti"/>
+                <field name="incharge_client"/>
 			    <field name="sap_project_code"/>
+                <field name="jbo_project_code"/>
+                <field name="cp_number"/>
+                <field name="date_tax"/>
+                <field name="jccc_resources"/>
 			    <!--<field name="po_project_id" domain="[('partner_id','=',partner_id)]" on_change="onchange_project_ids(partner_id,context)" context="{'partner_id' : partner_id,'sap_project_code' : sap_project_code,'user_id' : pm_user_id}"/> -->
 			    <field name="po_project_id" domain="[('partner_id','=',partner_id)]" context="{'partner_id':partner_id}"/>
 			</group>
@@ -318,7 +325,7 @@
                     <field name="product_id"/>
                     <filter string="My" domain="[('user_id','=',uid)]" name="my_sale_orders_filter"/>
                     <separator/>
-                    <filter string="Quotations" name="draft" domain="[('state','in',('draft','sent'))]" help="Sales Order that haven't yet been confirmed"/>
+                    <filter string="Purchase Orders" name="draft" domain="[('state','in',('draft','sent'))]" help="Sales Order that haven't yet been confirmed"/>
                     <filter string="Sales" name="sales" domain="[('state','in',('manual','progress'))]"/>
                     <filter string="To Invoice" domain="[('state','=','manual')]" help="Sales Order ready to be invoiced"/>
                     <filter string="Done" domain="[('state','=','done')]" help="Sales Order done"/>
@@ -381,7 +388,7 @@
 
 
         <record id="action_quotations" model="ir.actions.act_window">
-            <field name="name">Quotations</field>
+            <field name="name">Purchase Orders</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">sale.order</field>
             <field name="view_type">form</field>
@@ -676,7 +683,7 @@
         </record>
 
         <record id="action_quotations_salesteams" model="ir.actions.act_window">
-            <field name="name">Quotations</field>
+            <field name="name">Purchase Orders</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">sale.order</field>
             <field name="view_type">form</field>

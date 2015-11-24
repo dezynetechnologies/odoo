@@ -26,32 +26,38 @@ class sale_report(osv.osv):
     _name = "sale.report"
     _description = "Sales Orders Statistics"
     _auto = False
-    _rec_name = 'date'
+    _rec_name = 'name'
 
     _columns = {
-        'date': fields.datetime('Date Order', readonly=True),  # TDE FIXME master: rename into date_order
-        'date_confirm': fields.date('Date Confirm', readonly=True),
-        'product_id': fields.many2one('product.product', 'Product', readonly=True),
-        'product_uom': fields.many2one('product.uom', 'Unit of Measure', readonly=True),
-        'product_uom_qty': fields.float('# of Qty', readonly=True),
-        'partner_id': fields.many2one('res.partner', 'Partner', readonly=True),
-        'company_id': fields.many2one('res.company', 'Company', readonly=True),
-        'user_id': fields.many2one('res.users', 'Salesperson', readonly=True),
-        'pm_user_id': fields.many2one('res.users', 'Project Manager',readonly=True),
-        'price_total': fields.float('Total Price', readonly=True),
-        'delay': fields.float('Commitment Delay', digits=(16,2), readonly=True),
-        'categ_id': fields.many2one('product.category','Category of Product', readonly=True),
-        'po_project_id': fields.many2one('project.project', readonly=True),
-        'nbr': fields.integer('# of Lines', readonly=True),  # TDE FIXME master: rename into nbr_lines
-        'state': fields.selection([
-            ('cancel', 'Cancelled'),
-            ('draft', 'Draft'),
-            ('confirmed', 'Confirmed'),
-            ('exception', 'Exception'),
-            ('done', 'Done')], 'Order Status', readonly=True),
-        'pricelist_id': fields.many2one('product.pricelist', 'Pricelist', readonly=True),
-        'analytic_account_id': fields.many2one('account.analytic.account', 'Analytic Account', readonly=True),
-        'section_id': fields.many2one('crm.case.section', 'Sales Team'),
+        'name' : fields.char('Sales Order No.',readonly=True),
+        'po_no': fields.char('PO Number',readonly=True),
+        'delivery_due_date': fields.date('Delivery Due Date'),
+        'actual_delivery_date': fields.date('Actual delivery Date'),
+        'pre_po_date': fields.date('Pre-PO Date'),
+        'pre_po_amount' : fields.integer('Pre-PO Amount') ,
+        'date' : fields.date('PO Date'),
+        'po_amount' : fields.integer('PO Amount'),
+        'po_project_id': fields.many2one('project.project', string= "Project Description" ,readonly=True),
+        'user_id' : fields.many2one('res.users','Account Manager'),
+        'pm_user_id': fields.many2one('res.users','Project Manager'),
+        'nti_bu' : fields.many2one('hr.department','NTI BU'),
+        'sap_project_code': fields.char('SAP Project Code'),
+        'partner_id' : fields.many2one('res.partner','Client'),
+        'client_bu': fields.char('Client BU'),
+        'client_div': fields.char('Client Division'),
+        'po_start': fields.date('PO Start'),
+        'po_end': fields.date('PO End'),
+        'al_date': fields.date('AL Date'),
+        'tax_category': fields.selection([
+            ('WT', 'WT'),
+            ('CT', 'CT')
+            ], 'Tax Category'),
+        'invoice_number' : fields.char('Invoice Number'),
+        'invoice_date' : fields.date('Invoice Date'),
+        'invoice_billed' : fields.integer('Invoice billed(JPY)'),
+        'shipping_invoice_number' : fields.char('Shipping Invoice Number'),
+        'payment_due_date': fields.date('Payment Due Date'),
+        'payment_date': fields.date('Payment Date')
     }
     _order = 'date desc'
 
@@ -67,24 +73,33 @@ class sale_report(osv.osv):
                     FROM res_currency_rate r
                 )
              SELECT min(l.id) as id,
-                    l.product_id as product_id,
-                    t.uom_id as product_uom,
-                    sum(l.product_uom_qty / u.factor * u2.factor) as product_uom_qty,
-                    sum(l.product_uom_qty * cr.rate * l.price_unit * (100.0-l.discount) / 100.0) as price_total,
-                    count(*) as nbr,
-                    s.date_order as date,
-                    s.date_confirm as date_confirm,
-                    s.partner_id as partner_id,
+                    s.name as name,
+                    s.po_no as po_no,
+                    s.delivery_due_date as delivery_due_date,
+                    s.actual_delivery_date as actual_delivery_date,
+                    s.pre_po_date as pre_po_date,
+                    s.pre_po_amount as pre_po_amount,
+                    s.po_date as date,
+                    s.po_amount as po_amount,
+                    s.po_project_id as po_project_id,
                     s.user_id as user_id,
                     s.pm_user_id as pm_user_id,
-                    s.company_id as company_id,
-                    extract(epoch from avg(date_trunc('day',s.date_confirm)-date_trunc('day',s.create_date)))/(24*60*60)::decimal(16,2) as delay,
-                    l.state,
-                    t.categ_id as categ_id,
-                    s.pricelist_id as pricelist_id,
-                    s.project_id as analytic_account_id,
-                    s.po_project_id as po_project_id,
-                    s.section_id as section_id
+                    s.nti_bu as nti_bu,
+                    s.sap_project_code as sap_project_code,
+                    s.partner_id as partner_id,
+                    s.client_bu as client_bu,
+                    s.client_div as client_div,
+                    s.po_start as po_start,
+                    s.po_end as po_end,
+                    s.al_date as al_date,
+                    s.tax_category as tax_category,
+                    si.number as invoice_number,
+                    si.date as invoice_date,
+                    si.amount as invoice_billed,
+                    si.shipping_number as shipping_invoice_number,
+                    s.payment_due_date as payment_due_date,
+                    s.payment_date as payment_date
+
         """
         return select_str
 
@@ -92,6 +107,7 @@ class sale_report(osv.osv):
         from_str = """
                 sale_order_line l
                       join sale_order s on (l.order_id=s.id)
+                      join sale_invoice si on (s.id = si.order_id)
                         left join product_product p on (l.product_id=p.id)
                             left join product_template t on (p.product_tmpl_id=t.id)
                     left join product_uom u on (u.id=l.product_uom)
@@ -105,21 +121,33 @@ class sale_report(osv.osv):
 
     def _group_by(self):
         group_by_str = """
-            GROUP BY l.product_id,
-                    l.order_id,
-                    t.uom_id,
-                    t.categ_id,
-                    s.date_order,
-                    s.date_confirm,
-                    s.partner_id,
-                    s.user_id,
-                    s.pm_user_id,
-                    s.po_project_id,
-                    s.company_id,
-                    l.state,
-                    s.pricelist_id,
-                    s.project_id,
-                    s.section_id
+            GROUP BY s.name,
+                     s.po_no,
+                     s.delivery_due_date,
+                     s.actual_delivery_date,
+                     s.pre_po_date,
+                     s.pre_po_amount,
+                     s.po_date,
+                     s.po_amount,
+                     s.po_project_id,
+                     s.user_id,
+                     s.pm_user_id,
+                     s.nti_bu,
+                     s.sap_project_code,
+                     s.partner_id,
+                     s.client_bu,
+                     s.client_div,
+                     s.po_start,
+                     s.po_end,
+                     s.al_date,
+                     s.tax_category,
+                     si.number,
+                     si.date,
+                     si.amount,
+                     si.shipping_number,
+                     s.payment_due_date,
+                     s.payment_date
+
         """
         return group_by_str
 

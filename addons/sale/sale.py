@@ -47,6 +47,7 @@ class sale_invoice(osv.osv):
 
     _columns = {
         'number' : fields.char('Invoice Number',required=True),
+        'order_id': fields.many2one('sale.order', 'Order Reference', required=True, ondelete='cascade', select=True, readonly=True, states={'draft':[('readonly',False)]}),
         'shipping_number' : fields.char('Shipping Invoice Number',required=True),
         'amount':fields.integer('Invoice Amount'),
         'date': fields.date('Invoice Date', required=True, select=1, readonly=False),
@@ -222,8 +223,8 @@ class sale_order(osv.osv):
         'origin': fields.char('Source Document', help="Reference of the document that generated this sales order request."),
         'client_order_ref': fields.char('Reference/Description', copy=False),
         'state': fields.selection([
-            ('draft', 'Draft Quotation'),
-            ('sent', 'Quotation Sent'),
+            ('draft', 'Draft'),
+            ('sent', 'Sent'),
             ('cancel', 'Cancelled'),
             ('waiting_date', 'Waiting Schedule'),
             ('progress', 'Sales Order'),
@@ -252,7 +253,7 @@ class sale_order(osv.osv):
         'project_id': fields.many2one('account.analytic.account', 'Contract / Analytic', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="The analytic account related to a sales order."),
 
         'order_line': fields.one2many('sale.order.line', 'order_id', 'Order Lines', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=True),
-        'sale_invoice_ids': fields.many2many('sale.invoice', 'book_keeping_sale_order_invoice_rel', 'order_id', 'invoice_id', 'Invoices', copy=False, help="This is the list of invoices that have been generated for this sales order. The same sales order may have been invoiced in several times (by line for example)."),
+        'sale_invoice_ids': fields.one2many('sale.invoice', 'order_id', 'Invoices', copy=False, help="This is the list of invoices that have been generated for this sales order. The same sales order may have been invoiced in several times (by line for example)."),
         'invoice_ids': fields.many2many('account.invoice', 'sale_order_invoice_rel', 'order_id', 'invoice_id', 'Invoices', readonly=True, copy=False, help="This is the list of invoices that have been generated for this sales order. The same sales order may have been invoiced in several times (by line for example)."),
         'invoiced_rate': fields.function(_invoiced_rate, string='Invoiced Ratio', type='float'),
         'invoiced': fields.function(_invoiced, string='Paid',
@@ -288,6 +289,7 @@ class sale_order(osv.osv):
         'product_id': fields.related('order_line', 'product_id', type='many2one', relation='product.product', string='Product'),
         'first_level': fields.char('First Level Tracking'),
         'client_bu' : fields.char('Client BU'),
+        'client_div' : fields.char('Client Division'),
         'nti_bu' : fields.many2one('hr.department','NTI BU'),
         'sales_loc': fields.char('Sales Location'),
         'po_no': fields.char('PO Number',required=True,copy=False),
@@ -312,6 +314,12 @@ class sale_order(osv.osv):
         'payment_due_date': fields.date('Payment Due Date'),
         #'po_project_id': fields.many2one('project.project', 'Project', help="Project for which the said PO has been received.", required=True,ondelete='cascade',domain=['&',('partner_id','=','po_project_id.partner_id'),('sap_project_code','=','po_project_id.sap_project_code')])
         'po_project_id': fields.many2one('project.project', 'Project', help="Project for which the said PO has been received."),
+        'jbo_project_code' : fields.char('JBO Project Code'),
+        'incharge_nti' : fields.char('In-charge NTI'),
+        'incharge_client' : fields.char('In-charge Client'),
+        'cp_number' : fields.char('CP Number'),
+        'date_tax' : fields.date('Date of Tax Cenvention NUmber'),
+        'jccc_resources' : fields.boolean('Has JCCC Resources ')
     }
 
     _defaults = {

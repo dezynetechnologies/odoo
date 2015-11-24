@@ -6,11 +6,21 @@
             <field name="model">hr.timesheet.utilisation.report</field>
             <field name="arch" type="xml">
                 <graph string="Resource Utilisation" type="pivot">
-                    <field name="employee_id" type="row"/>
-                    <field name="date_from" interval="month" type="col"/>
-                    <field name="geography"/>
-                    <field name="billed_utilisation" type="measure"/>
-                    <field name="unbilled_utilisation" type="measure"/>
+                    <!--field name="employee_id" type="row"/>
+                    <field name="date" interval="month" type="col"/-->
+                    <!--field name="name" type="measure"/>
+                    <field name="employee_id" type="measure"/>
+                    <field name="employee_no" type="measure"/-->
+                    <field name="offshore_billed_mm" type="measure"/>
+                    <field name="offon_billed_mm" type="measure"/>
+                    <field name="total_billed_mm" type="measure"/>
+                    <field name="total_offshore_mm" type="measure"/>
+                    <field name="total_offon_mm" type="measure"/>
+                    <field name="total_mm" type="measure"/>
+                    <field name="offshore_billed_util" type="measure"/>
+                    <field name="offon_billed_util" type="measure"/>
+                    <field name="combined_billed_util" type="measure"/>
+                    <field name="timed_utilisation" type="measure"/>
                 </graph>
             </field>
         </record>
@@ -37,8 +47,6 @@
             <field name="arch" type="xml">
                 <search string="Resource Allocation">
                     <field name="employee_id"/>
-                    <field name="billed_utilisation"/>
-                    <field name="unbilled_utilisation"/>
                     <!--<filter string="This Month" name="month" domain="[('date','&lt;=', time.strftime('%Y-%m-%d')),('date','&gt;=',time.strftime('%Y-%m-01'))]" help="month"/> -->
                     <!-- <group expand="0" string="Extended Filters...">
                         <field name="general_account_id"/>
@@ -48,8 +56,9 @@
                         <field name="date"/>
                     </group> -->
                     <group expand="1" string="Group By">
-                        <filter string="Geography" name="group_geography_id" context="{'group_by':'geography'}"/>
                         <filter string="Project" context="{'group_by':'project_id'}"/>
+                        <filter string="Department" context="{'group_by':'department_id'}"/>
+                        <filter string="Employee" context="{'group_by':'employee_id'}"/>
                         <!--<filter string="Month" context="{'group_by':'date:month'}" help="Group by month of date"/>-->
                     </group>
                 </search>
