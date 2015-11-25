@@ -33,25 +33,21 @@ class project_profitability_report(osv.osv):
         'name': fields.char("Name", required=True),
         'employee_id': fields.many2one('hr.employee', 'Employee', readonly=True),
         'employee_no': fields.char('Employee No'),
-        'doj': fields.date("Date of Joining"),
+        'revenue' : fields.integer('Revenue(INR)'),
+        'direct_cost' : fields.integer('Direct Cost(INR)'),
+        'gross_profit': fields.integer('Gross Profit(INR)'),
+        'sga' : fields.integer('SGA(INR)'),
+        'operating_profit' : fields.integer('Operating Profit(INR)'),
+        'gross_profit_perc' : fields.float('Gross Profit(%)'),
+        'oper_profit_perc' : fields.float('Operating Profit(%)'),
         'department_id':fields.many2one('hr.department','Department',readonly=True),
         'date_from': fields.date('Date from',readonly=True,),
         'date_to': fields.date('Date to',readonly=True),
         'project_id': fields.many2one('project.project','Project'),
-        'geography':fields.selection([('onsite','onsite'),('offshore','offshore')],'Geography'),
-        'billed_status':fields.selection([('billed','billed'),('unbilled','unbilled')],'Billing Status'),
-        'project_role' : fields.char('Project Role'),
-        'billing_perc': fields.integer('Billing',help="Billing percentage (0 to 100)"),
-        'allocation_perc': fields.integer('Allocation',help="Allocation percentage (0 to 100) for the period"),
         'pay' : fields.integer('Pay(cost)'),
         'billing' : fields.integer('Billing'),
         'profit' : fields.integer('Gross Profit'),
         'profit_percentage' : fields.float('Profit Percentage'),
-        'state' : fields.selection([
-            ('new', 'New'),
-            ('draft','Draft'),
-            ('confirm','Confirmed'),
-            ('done','Done')], 'Status', readonly=True),
         }
     _order = 'name asc'
 
@@ -60,31 +56,32 @@ class project_profitability_report(osv.osv):
              SELECT min(e.id) as id,
                     e.name_related as name,
                     e.id as employee_id,
-                    e.employee_no as employee_no,
-                    e.doj as doj,
                     t.department_id as department_id,
                     t.date_from as date_from,
                     t.date_to as date_to,
                     t.project_id as project_id,
-                    t.geography as geography,
-                    t.billed_status as billed_status,
-                    t.project_role as project_role,
                     t.billing_perc as billing_perc,
                     t.allocation_perc as allocation_perc,
                     ( t.date_to - t.date_from + 1) as num_of_days,
                     date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) as total_days,
-                    ((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )as pay,
-                    ((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) ) as billing,
-                    ( (((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) - (((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) ) as profit,
+		    (0::numeric) as sga,
+                    ((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )as direct_cost,
+                    ((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) ) as revenue,
+                    ( (((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) - (((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) ) as gross_profit,
+                    ( (((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) - (((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) ) as operating_profit,
                     case when t.billed_status::text = 'billed' then ((( (((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) - (((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) )
-)*100/(((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) ) else 0::numeric end as profit_percentage
+)*100/(((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) ) else 0::numeric end as gross_profit_perc,
+                    case when t.billed_status::text = 'billed' then ((( (((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) - (((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) )
+)*100/(((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) ) else 0::numeric end as oper_profit_perc
+
+
         """
         return select_str
 
     def _from(self):
         from_str = """
                 hr_employee e
-                    left join hr_timesheet_sheet_sheet t on e.id=t.employee_id
+                    left join hr_timesheet_sheet_sheet t on e.id = t.employee_id
                     left join public.hr_payslip p on
                         t.employee_id = p.employee_id  and t.date_from = p.date_from
         """
