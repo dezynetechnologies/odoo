@@ -300,9 +300,7 @@ class hr_payslip(osv.osv):
         'credit_note': fields.boolean('Credit Note', help="Indicates this payslip has a refund of another", readonly=True, states={'draft': [('readonly', False)]}),
         'payslip_run_id': fields.many2one('hr.payslip.run', 'Payslip Batches', readonly=True, states={'draft': [('readonly', False)]}, copy=False),
         'payslip_count': fields.function(_count_detail_payslip, type='integer', string="Payslip Computation Details"),
-	    'basic_pay': fields.integer('Basic Pay',required=True),
-        'onsite_allowance' : fields.integer('Onsite Allowance',required=True),
-        'offshore_salary' : fields.integer('Offshore Salary',required=True),
+	'basic_pay': fields.integer('Basic Pay',required=True),
         'currency_id' : fields.many2one('res.currency', "Currency", required=True, help="The currency the field is expressed in."),
 
     }
@@ -661,7 +659,6 @@ class hr_payslip(osv.osv):
         return result
 
     def onchange_employee_id(self, cr, uid, ids, date_from, date_to, employee_id=False, contract_id=False, context=None):
-	department_id = False
         empolyee_obj = self.pool.get('hr.employee')
         contract_obj = self.pool.get('hr.contract')
         worked_days_obj = self.pool.get('hr.payslip.worked_days')
@@ -695,11 +692,9 @@ class hr_payslip(osv.osv):
             return res
         ttyme = datetime.fromtimestamp(time.mktime(time.strptime(date_from, "%Y-%m-%d")))
         employee_id = empolyee_obj.browse(cr, uid, employee_id, context=context)
-	department_id = employee_id.department_id.id
         res['value'].update({
                     'name': _('Salary Slip of %s for %s') % (employee_id.name, tools.ustr(ttyme.strftime('%B-%Y'))),
-                    'company_id': employee_id.company_id.id,
-		    'department_id' : department_id
+                    'company_id': employee_id.company_id.id
         })
 
         if not context.get('contract', False):
