@@ -11,23 +11,30 @@
                  <field name="date" interval="month" type="col"/-->
                  <field name="name" type="measure"/>
                  <field name="po_no" type="measure"/>
+                 <field name="po_name" type="measure"/>
                  <field name="delivery_due_date" type="measure"/>
                  <field name="actual_delivery_date" type="measure"/>
                  <field name="pre_po_date" type="measure"/>
                  <field name="date" type="measure"/>
                  <field name="po_amount" type="measure"/>
                  <field name="po_project_id" type="measure"/>
+                 <field name="jbo_project_code" type="measure"/>
                  <field name="user_id" type="measure"/>
                  <field name="pm_user_id" type="measure"/>
+                 <field name="incharge_nti" type="measure"/>
                  <field name="nti_bu" type="measure"/>
                  <field name="sap_project_code" type="measure"/>
                  <field name="partner_id" type="measure"/>
                  <field name="client_bu" type="measure"/>
                  <field name="client_div" type="measure"/>
+                 <field name="incharge_client" type="measure"/>
                  <field name="po_start" type="measure"/>
                  <field name="po_end" type="measure"/>
                  <field name="al_date" type="measure"/>
                  <field name="tax_category" type="measure"/>
+                 <field name="date_tax" type="measure"/>
+                 <field name="cp_number" type="measure"/>
+                 <field name="jccc_resources" type="measure"/>
                  <field name="invoice_number" type="measure"/>
                  <field name="invoice_date" type="measure"/>
                  <field name="invoice_billed" type="measure"/>

@@ -239,7 +239,7 @@ class sale_order(osv.osv):
         'date_order': fields.datetime('Date', required=True, readonly=True, select=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True, help="Date on which sales order is created."),
         'date_confirm': fields.date('Confirmation Date', readonly=True, select=True, help="Date on which sales order is confirmed.", copy=False),
-        'user_id': fields.many2one('res.users', 'Salesperson'),
+        'user_id': fields.many2one('res.users', 'Account Manager'),
         #'user_id': fields.many2one('res.users', 'Salesperson', states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, select=True, track_visibility='onchange'),
         'partner_id': fields.many2one('res.partner', 'Customer', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, required=True, change_default=True, select=True, track_visibility='always'),
         'partner_invoice_id': fields.many2one('res.partner', 'Invoice Address', readonly=True, required=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Invoice address for current sales order."),
@@ -293,6 +293,7 @@ class sale_order(osv.osv):
         'nti_bu' : fields.many2one('hr.department','NTI BU'),
         'sales_loc': fields.char('Sales Location'),
         'po_no': fields.char('PO Number',required=True,copy=False),
+        'po_name': fields.char('PO Name',required=True,copy=False),
         'tax_category': fields.selection([
             ('WT', 'WT'),
             ('CT', 'CT')
@@ -318,7 +319,7 @@ class sale_order(osv.osv):
         'incharge_nti' : fields.char('In-charge NTI'),
         'incharge_client' : fields.char('In-charge Client'),
         'cp_number' : fields.char('CP Number'),
-        'date_tax' : fields.date('Date of Tax Cenvention NUmber'),
+        'date_tax' : fields.date('Date of Tax Convention Number'),
         'jccc_resources' : fields.boolean('Has JCCC Resources ')
     }
 

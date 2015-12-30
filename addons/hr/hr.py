@@ -199,6 +199,7 @@ class hr_employee(osv.osv):
         'gender': fields.selection([('male', 'Male'), ('female', 'Female')], 'Gender'),
         'marital': fields.selection([('single', 'Single'), ('married', 'Married'), ('widower', 'Widower'), ('divorced', 'Divorced')], 'Marital Status'),
         'department_id': fields.many2one('hr.department', 'Department'),
+        'department_code': fields.char('Department Code'),
         'address_id': fields.many2one('res.partner', 'Working Address'),
         'address_home_id': fields.many2one('res.partner', 'Home Address'),
         'bank_account_id': fields.many2one('res.partner.bank', 'Bank Account Number', domain="[('partner_id','=',address_home_id)]", help="Employee bank salary account"),
@@ -212,7 +213,8 @@ class hr_employee(osv.osv):
         'child_ids': fields.one2many('hr.employee', 'parent_id', 'Subordinates'),
         'resource_id': fields.many2one('resource.resource', 'Resource', ondelete='cascade', required=True, auto_join=True),
         'coach_id': fields.many2one('hr.employee', 'Coach'),
-        'job_id': fields.many2one('hr.job', 'Job Title'),
+        #'job_id': fields.many2one('hr.job', 'Job Title'),
+        'job_id': fields.char('Job Title'),
         # image: all image fields are base64 encoded and PIL-supported
         'image': fields.binary("Photo",
             help="This field holds the image used as photo for the employee, limited to 1024x1024px."),
@@ -295,6 +297,13 @@ class hr_employee(osv.osv):
         context = dict(context or {})
         if context.get("mail_broadcast"):
             context['mail_create_nolog'] = True
+        print data
+        users = False
+        if data['work_email']:
+            users = self.pool.get('res.users').search(cr, uid, [('email', '=', data['work_email'])], context=context)
+            if users:
+                user_id = users[0]
+                data['user_id'] = user_id
 
         employee_id = super(hr_employee, self).create(cr, uid, data, context=context)
 
@@ -335,6 +344,14 @@ class hr_employee(osv.osv):
         if user_id:
             work_email = self.pool.get('res.users').browse(cr, uid, user_id, context=context).email
         return {'value': {'work_email': work_email}}
+
+    def onchange_work_email(self,cr,uid,ids,work_email,context=None):
+        user_id = False
+        users = False
+        if work_email:
+            users = self.pool.get('res.users').search(cr, uid, [('email', '=', work_email)], context=context)
+            user_id = users[0]
+        return {'value':{'user_id': user_id}}
 
     def action_follow(self, cr, uid, ids, context=None):
         """ Wrapper because message_subscribe_users take a user_ids=None
@@ -399,13 +416,17 @@ class hr_department(osv.osv):
         'member_ids': fields.one2many('hr.employee', 'department_id', 'Members', readonly=True),
         'jobs_ids': fields.one2many('hr.job', 'department_id', 'Jobs'),
         'note': fields.text('Note'),
-        'is_unit' : fields.boolean('Is NTI Unit',required=True)
+        'is_unit' : fields.boolean('Is NTI Unit',required=True),
+        'department_code' : fields.char('Department Code',required=True,unique=True)
     }
 
     _defaults = {
         'company_id': lambda self, cr, uid, c: self.pool.get('res.company')._company_default_get(cr, uid, 'hr.department', context=c),
         'is_unit' : False,
     }
+    _sql_constraints = [
+        ('department_code_uniq', 'unique(department_code, company_id)', 'Department Code should be unique per Company!'),
+    ]
 
     def _check_recursion(self, cr, uid, ids, context=None):
         if context is None:

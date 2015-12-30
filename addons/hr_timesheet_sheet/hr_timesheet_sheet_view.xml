@@ -86,6 +86,7 @@
                     <div class="oe_title">
                         <label for="project_id" class="oe_edit_only"/>
                         <h1><field name="project_id" on_change="onchange_project_id(project_id)" class="oe_inline"/></h1>
+                        <h1><field name="sap_project_code" on_change="onchange_sap_project_code(sap_project_code)" class="oe_inline"/></h1>
                     </div>
                     <group>
                         <group string="Time Period">
@@ -368,7 +369,8 @@
                     <field name="department_id" invisible="0"/>
                     <field name="date_from"/>
                     <field name="date_to"/>
-                    <field name="project_id"/>
+                    <field name="project_id" on_change="onchange_project_id(project_id)"/>
+                    <field name="sap_project_code" on_change="onchange_sap_project_code(sap_project_code)"/>
                     <field name="second_level"/>
                     <field name="billing_rate_card_id"/>
                     <field name="project_role"/>

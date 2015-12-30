@@ -782,6 +782,54 @@
             </field>
         </record>
 
+        <record id="exchange_rate_tree" model="ir.ui.view">
+            <field name="name">exchange.rate.tree</field>
+            <field name="model">exchange.rate</field>
+            <field name="arch" type="xml">
+                <tree string="Exchange Rate">
+                        <field name="date"/>
+                        <field name="rate" />
+                        <!--field name="currency_id" groups="base.group_multi_currency"/-->
+                        <field name="from_currency_id"/>
+                        <field name="to_currency_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="exchange_rate_form" model="ir.ui.view">
+            <field name="name">exchange.rate.form</field>
+            <field name="model">exchange.rate</field>
+            <field name="arch" type="xml">
+                <form string="Exchange Rate">
+                    <group>
+                        <field name="date"/>
+                        <field name="rate"/>
+                        <field name="from_currency_id"/>
+                        <field name="to_currency_id"/>
+		            </group>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="open_exchange_rates_all" model="ir.actions.act_window">
+            <field name="name">Exchange Rates</field>
+            <field name="res_model">exchange.rate</field>
+            <field name="view_type">form</field>
+            <!-- <field name="domain">[]</field> -->
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="exchange_rate_tree"/>
+            <!-- <field name="search_view_id" ref="view_project_project_filter"/>
+            <field name="context">{'search_default_Current': 1}</field> -->
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                  Click to create a Exchange Rate.
+                </p><p>
+                  Here you can define the exchange rate.
+                </p>
+            </field>
+        </record>
+
         <record id="project_expenses_tree" model="ir.ui.view">
             <field name="name">project.expenses.tree</field>
             <field name="model">project.expenses</field>
@@ -986,7 +1034,34 @@
                 </form>
             </field>
         </record>
+       <record id="exchange_rate_card_tree" model="ir.ui.view">
+            <field name="name">exchange.rate.card.tree</field>
+            <field name="model">exchange.rate.card</field>
+            <field name="arch" type="xml">
+                <tree string="Exchange Rate Card">
+                        <field name="name" colspan="4"/>
+                </tree>
+            </field>
+        </record>
 
+       <record id="exchange_rate_card_form" model="ir.ui.view">
+            <field name="name">exchange.rate.card.tree</field>
+            <field name="model">exchange.rate.card</field>
+            <field name="arch" type="xml">
+                <form string="Exchange Rate Card">
+                    <group>
+                        <field name="name"/>
+                        <field name="from_currency_id"/>
+                        <field name="to_currency_id"/>
+                    </group>
+                    <notebook>
+                    <page string="Billing Table">
+                        <field name="exchange_table"/>
+                    </page>
+                    </notebook>
+                </form>
+            </field>
+        </record>
 
         <record id="open_project_billing_rate_cards_all" model="ir.actions.act_window">
             <field name="name">Project Billing Rate Cards</field>
@@ -1002,6 +1077,23 @@
                   Click to create Project Billing Rate Card.
                 </p><p>
                   Here you can create project billing rate card.
+                </p>
+            </field>
+        </record>
+        <record id="open_exchange_rate_cards_all" model="ir.actions.act_window">
+            <field name="name">Exchange Rate Cards</field>
+            <field name="res_model">exchange.rate.card</field>
+            <field name="view_type">form</field>
+            <!-- <field name="domain">[]</field> -->
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="exchange_rate_card_tree"/>
+            <!-- <field name="search_view_id" ref="view_project_project_filter"/>
+            <field name="context">{'search_default_Current': 1}</field> -->
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                  Click to create Exchange Rate Card.
+                </p><p>
+                  Here you can create exchange rate card.
                 </p>
             </field>
         </record>
@@ -1034,7 +1126,8 @@
         <menuitem action="open_project_specific_expenses_all" id="menu_project_specific_expenses" name="Specific Costs" parent="menu_project_management" sequence="4"/>
         <menuitem action="open_project_employee_expenses_all" id="menu_project_employee_expenses" name="Employee Costs" parent="menu_project_management" sequence="5"/>
 
-        <menuitem action="open_project_billing_rate_cards_all" id="menu_billing_cards" name="Billing Rate Cards" parent="menu_project_management" sequence="4"/>
+        <menuitem action="open_project_billing_rate_cards_all" id="menu_billing_cards" name="Billing Rate Cards" parent="menu_project_management" sequence="6"/>
+        <menuitem action="open_exchange_rate_cards_all" id="menu_exchange_cards" name="Exchange Rate Cards" parent="menu_project_management" sequence="7"/>
 
         <!--menuitem action="open_billing_rates_all" id="menu_billing_rate" name="Billing Rates" parent="menu_project_management" sequence="5"/-->
 

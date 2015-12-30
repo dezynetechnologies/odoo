@@ -210,9 +210,10 @@ class hr_timesheet_sheet(osv.osv):
         'timesheet_activity_count': fields.function(_count_all, type='integer', string='Timesheet Activities', multi=True),
         'attendance_count': fields.function(_count_all, type='integer', string="Attendances", multi=True),
         'project_id': fields.many2one('project.project','Project',required=True),
+        'sap_project_code': fields.char('SAP Project Code'),
         'second_level': fields.char('Second Level Tracking'),
         'geography':fields.selection([('offon','offon'),('offshore','offshore')],'Geography'),
-        'billed_status':fields.selection([('billed','billed'),('unbilled','unbilled')],'Billing Status'),
+        'billed_status':fields.selection([('billed','billed'),('unbilled','unbilled'),('partially_billed','partially_billed')],'Billing Status'),
         'billing_perc': fields.integer('Billing',help="Billing percentage (0 to 100)"),
         'allocation_perc': fields.integer('Allocation',help="Allocation percentage (0 to 100) for the period"),
         'monthly_billing_rate':fields.integer('Monthly Billing Rate',help="Monthly billing rate for the given employee and period.",required=True),
@@ -223,6 +224,16 @@ class hr_timesheet_sheet(osv.osv):
         #'project_role' : fields.related('billing_rate_card_id', 'billing_table', type="one2many", relation="project.billing.rate", store=True, string="Project Role", required=True),
 
     }
+
+
+    def onchange_sap_project_code(self,cr,uid,ids,sap_project_code,context=None):
+        project_id = False
+        projects = False
+        if sap_project_code:
+            projects = self.pool.get('project.project').search(cr, uid, [('sap_project_code', '=', sap_project_code)], context=context)
+            project_id = projects[0]
+        return {'value':{'project_id': project_id}}
+
 
     def _default_date_from(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
@@ -356,10 +367,12 @@ class hr_timesheet_sheet(osv.osv):
 
     def onchange_project_id(self, cr, uid, ids, project_id, context=None):
         billing_rate_card_id = False
+        sap_project_code = False
         if project_id:
+            sap_project_code = self.pool.get('project.project').browse(cr, uid, project_id, context=context).sap_project_code
             proj_id = self.pool.get('project.project').browse(cr,uid,project_id,context=context)
             billing_rate_card_id = proj_id.billing_rate_card_id.id
-        return {'value':{'billing_rate_card_id':billing_rate_card_id}}
+        return {'value':{'billing_rate_card_id':billing_rate_card_id,'sap_project_code': sap_project_code}}
 
     def onchange_rate_card(self, cr, uid, ids, billing_rate_card_id , context=None):
         res = []

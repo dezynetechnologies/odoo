@@ -170,6 +170,47 @@ class project_billing_rate_card(osv.osv):
     }
 
 
+class exchange_rate(osv.osv):
+    _name = 'exchange.rate'
+    _description = 'Exchange Rate'
+
+    def _get_currency(self, cr, uid, ctx):
+        comp = self.pool.get('res.users').browse(cr,uid,uid).company_id
+        if not comp:
+            comp_id = self.pool.get('res.company').search(cr, uid, [])[0]
+            comp = self.pool.get('res.company').browse(cr, uid, comp_id)
+        return comp.billing_currency_id.id
+
+
+    _columns = {
+        'rate': fields.float('Exchange Rate'),
+        'date': fields.date('Date'),
+        'rate_card_id' : fields.many2one('exchange.rate.card',string="Exchange Rate Card"),
+        'to_currency_id' : fields.many2one('res.currency', "Target Currency", required=True, help="The currency the field is expressed in."),
+        'from_currency_id' : fields.many2one('res.currency', "Source Currency", required=True, help="The currency the field is expressed in.")
+    }
+    _order = "id"
+    _defaults = {
+        'to_currency_id': _get_currency
+    }
+
+
+class exchange_rate_card(osv.osv):
+    _name = 'exchange.rate.card'
+    _description = 'Exchange Rate Card'
+    _columns = {
+        'name' : fields.char('Exchange Rate Card Name',required=True),
+        'to_currency_id' : fields.many2one('res.currency', "Target Currency", required=True, help="The currency the field is expressed in."),
+        'from_currency_id' : fields.many2one('res.currency', "Source Currency", required=True, help="The currency the field is expressed in."),
+        'exchange_table' : fields.one2many('exchange.rate','rate_card_id',"Exchange Table")
+        #'billing_table': fields.many2many('project.billing.rate','project_billing_rate_card_rel','card_id','rate_id',string="Billing Table")
+    }
+    _order = "id"
+    _defaults = {
+
+    }
+
+
 class project_task_type(osv.osv):
     _name = 'project.task.type'
     _description = 'Task Stage'
