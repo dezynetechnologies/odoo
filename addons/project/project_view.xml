@@ -898,6 +898,7 @@
             <field name="arch" type="xml">
                 <tree string="Specific Costs">
                         <field name="project_id"/>
+                        <field name="sap_project_code"/>
                         <field name="category"/>
                         <field name="date"/>
                         <field name="exp_cost"/>
@@ -915,6 +916,7 @@
                 <form string="Specific Costs">
                     <group col="4">
                         <field name="project_id"/>
+                        <field name="sap_project_code"/>
                         <field name="category"/>
                     </group>
                     <group col="4">

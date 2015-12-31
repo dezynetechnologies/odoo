@@ -116,6 +116,7 @@ class project_specific_expenses(osv.osv):
 	'project_id': fields.many2one('project.project', 'Project', help="Project to be accounted for this expense."),
         #'category':fields.selection([('software_cost','Software Cost'),('hardware_cost','Hardware Cost')],string="Expense Type"),
         'category' : fields.char('Expense Type', required=True),
+        'sap_project_code' : fields.char('SAP Project Code', required=True),
         'date': fields.date('Date', required=True, select=1, readonly=False),
         'exp_cost':fields.integer('Actual Cost'),
         'exp_currency_id' : fields.many2one('res.currency', "Currency", required=True,help="The currency the field is expressed in."),
