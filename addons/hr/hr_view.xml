@@ -48,8 +48,8 @@
                                     </group-->
                                     <group string="Position">
                                         <field name="department_id" on_change="onchange_department_id(department_id)"/>
-                                        <field name="department_code"/>
-                                        <field name="job_id"/>
+                                        <field name="department_code" invisible="1"/>
+                                        <field name="jobtitle_id"/>
                                         <field name="emp_band"/>
                                         <field name="emp_sband" invisible="1"/>
                                         <field name="parent_id" invisible="1"/>
@@ -133,7 +133,7 @@
                     <field name="work_email"/>
                     <field name="company_id" groups="base.group_multi_company" invisible="1"/>
                     <field name="department_id"/>
-                    <field name="job_id"/>
+                    <field name="jobtitle_id"/>
                     <field name="billable"/>
                     <field name="active"/>
                     <field name="parent_id" invisible="1"/>

@@ -213,8 +213,8 @@ class hr_employee(osv.osv):
         'child_ids': fields.one2many('hr.employee', 'parent_id', 'Subordinates'),
         'resource_id': fields.many2one('resource.resource', 'Resource', ondelete='cascade', required=True, auto_join=True),
         'coach_id': fields.many2one('hr.employee', 'Coach'),
-        #'job_id': fields.many2one('hr.job', 'Job Title'),
-        'job_id': fields.char('Job Title'),
+        'job_id': fields.many2one('hr.job', 'Job Title'),
+        'jobtitle_id': fields.char('Job Title'),
         # image: all image fields are base64 encoded and PIL-supported
         'image': fields.binary("Photo",
             help="This field holds the image used as photo for the employee, limited to 1024x1024px."),
@@ -297,13 +297,35 @@ class hr_employee(osv.osv):
         context = dict(context or {})
         if context.get("mail_broadcast"):
             context['mail_create_nolog'] = True
+        print "hr module create() method called\n"
         print data
-        users = False
+        users = []
+        departments = []
+        employees = []
+        employee = False
+        if data['employee_no']:
+            employees = self.pool.get('hr.employee').search(cr, uid, [('employee_no', '=', data['employee_no'])], context=context)
+            print employees
+            if len(employees) > 0:
+                print "Employee with same employee no. found"
+                #Ignore this entry else system raises an error
+                return
+                #if data.has_key('id') == False:
+                #    employee = employees[0]
+                #
+                #    print employee
+                #    #print employee.id
+                #   data['id'] = employee
+
+        if data['department_code']:
+            departments = self.pool.get('hr.department').search(cr, uid, [('department_code', '=', data['department_code'])], context=context)
+            if departments:
+                data['department_id'] = departments[0]
+
         if data['work_email']:
-            users = self.pool.get('res.users').search(cr, uid, [('email', '=', data['work_email'])], context=context)
+            users = self.pool.get('res.users').search(cr, uid, [('login', '=', data['work_email'])], context=context)
             if users:
-                user_id = users[0]
-                data['user_id'] = user_id
+                data['user_id'] = users[0]
 
         employee_id = super(hr_employee, self).create(cr, uid, data, context=context)
 
@@ -416,7 +438,7 @@ class hr_department(osv.osv):
         'member_ids': fields.one2many('hr.employee', 'department_id', 'Members', readonly=True),
         'jobs_ids': fields.one2many('hr.job', 'department_id', 'Jobs'),
         'note': fields.text('Note'),
-        'is_unit' : fields.boolean('Is NTI Unit',required=True),
+        'is_unit' : fields.boolean('Is NTI Unit'),
         'department_code' : fields.char('Department Code',required=True,unique=True)
     }
 

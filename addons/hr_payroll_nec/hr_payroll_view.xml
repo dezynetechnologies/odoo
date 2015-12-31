@@ -78,7 +78,7 @@
             </field>
         </record>
         <record id="action_view_hr_payslip_form" model="ir.actions.act_window">
-            <field name="name">Employee Payslips</field>
+            <field name="name">Employee Costslips</field>
             <field name="res_model">hr.payslip.nec</field>
             <field name="view_type">form</field>
             <field name="view_id" ref="view_hr_payslip_tree"/>

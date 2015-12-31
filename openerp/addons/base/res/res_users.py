@@ -326,6 +326,11 @@ class res_users(osv.osv):
             access_rights_uid=access_rights_uid)
 
     def create(self, cr, uid, vals, context=None):
+        users = []
+        if vals['login']:
+            users = self.pool.get('res.users').search(cr, uid, [('login', '=', vals['login'])], context=context)
+        if len(users):
+                return
         user_id = super(res_users, self).create(cr, uid, vals, context=context)
         user = self.browse(cr, uid, user_id, context=context)
         if user.partner_id.company_id: 

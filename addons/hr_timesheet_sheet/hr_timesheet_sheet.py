@@ -221,8 +221,14 @@ class hr_timesheet_sheet(osv.osv):
         #'project_role' : fields.selection(_project_role_selection,'Project Role',required=True),
         'project_role' : fields.many2one('project.billing.rate','Project Role',required=True),
         'billing_rate_card_id' : fields.many2one('project.billing.rate.card','Billing Rate Card',required=True),
+        'opening_wip_bill_curr' : fields.float('Opening WIP(Billing Currency)'),
+        'opening_wip_inr' : fields.float('Opening WIP(INR)'),
+        'closing_wip_bill_curr' : fields.float('Closing WIP(Billing Currency)'),
+        'closing_wip_inr' : fields.float('Closing WIP(INR)'),
+        'exchange_rate_on_closing' : fields.float('Exchange Rate on Closing'),
+        'revenue_bill_curr' : fields.float('Revenue(Billing Currency)'),
+        'revenue_inr' : fields.float('Revenue(INR)')
         #'project_role' : fields.related('billing_rate_card_id', 'billing_table', type="one2many", relation="project.billing.rate", store=True, string="Project Role", required=True),
-
     }
 
 

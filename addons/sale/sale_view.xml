@@ -132,7 +132,8 @@
                     <h1>
                         <label string="Order" attrs="{'invisible': [('state','not in',('draft','sent'))]}"/>
                         <label string="Sales Order " attrs="{'invisible': [('state','in',('draft','sent'))]}"/>
-                        <field name="name" class="oe_inline" readonly="1"/>
+                        <!--field name="name" class="oe_inline" readonly="1"/-->
+                        <field name="name" class="oe_inline"/>
                     </h1>
                     <group>
                         <group>
