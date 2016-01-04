@@ -12,6 +12,7 @@
                  <field name="name" type="measure"/>
                  <field name="po_no" type="measure"/>
                  <field name="po_name" type="measure"/>
+                 <field name="sales_loc" type="measure"/>
                  <field name="delivery_due_date" type="measure"/>
                  <field name="actual_delivery_date" type="measure"/>
                  <field name="pre_po_date" type="measure"/>
