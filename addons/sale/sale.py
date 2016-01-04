@@ -241,15 +241,15 @@ class sale_order(osv.osv):
         'date_confirm': fields.date('Confirmation Date', readonly=True, select=True, help="Date on which sales order is confirmed.", copy=False),
         'user_id': fields.many2one('res.users', 'Account Manager'),
         #'user_id': fields.many2one('res.users', 'Salesperson', states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, select=True, track_visibility='onchange'),
-        'partner_id': fields.many2one('res.partner', 'Customer', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, required=True, change_default=True, select=True, track_visibility='always'),
-        'partner_invoice_id': fields.many2one('res.partner', 'Invoice Address', readonly=True, required=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Invoice address for current sales order."),
-        'partner_shipping_id': fields.many2one('res.partner', 'Delivery Address', readonly=True, required=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Delivery address for current sales order."),
+        'partner_id': fields.many2one('res.partner', 'Customer', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, required=False, change_default=True, select=True, track_visibility='always'),
+        'partner_invoice_id': fields.many2one('res.partner', 'Invoice Address', readonly=True, required=False, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Invoice address for current sales order."),
+        'partner_shipping_id': fields.many2one('res.partner', 'Delivery Address', readonly=True, required=False, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Delivery address for current sales order."),
         'order_policy': fields.selection([
                 ('manual', 'On Demand'),
             ], 'Create Invoice', required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
             help="""This field controls how invoice and delivery operations are synchronized."""),
-        'pricelist_id': fields.many2one('product.pricelist', 'Pricelist', required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Pricelist for current sales order."),
-        'currency_id': fields.related('pricelist_id', 'currency_id', type="many2one", relation="res.currency", string="Currency", readonly=True, required=True),
+        'pricelist_id': fields.many2one('product.pricelist', 'Pricelist', required=False, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Pricelist for current sales order."),
+        'currency_id': fields.related('pricelist_id', 'currency_id', type="many2one", relation="res.currency", string="Currency", readonly=True, required=False),
         'project_id': fields.many2one('account.analytic.account', 'Contract / Analytic', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="The analytic account related to a sales order."),
 
         'order_line': fields.one2many('sale.order.line', 'order_id', 'Order Lines', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=True),
@@ -291,9 +291,10 @@ class sale_order(osv.osv):
         'client_bu' : fields.char('Client BU'),
         'client_div' : fields.char('Client Division'),
         'nti_bu' : fields.many2one('hr.department','NTI BU'),
+        'nti_bu_code' : fields.char('NTI BU Code'),
         'sales_loc': fields.char('Sales Location'),
         'po_no': fields.char('PO Number',required=True,copy=False),
-        'po_name': fields.char('PO Name',required=True,copy=False),
+        'po_name': fields.char('PO Name',required=False,copy=False),
         'tax_category': fields.selection([
             ('WT', 'WT'),
             ('CT', 'CT')
@@ -303,7 +304,7 @@ class sale_order(osv.osv):
         'actual_delivery_date': fields.date('Actual Delivery Date'),
         'pre_po_date': fields.date('Pre-PO Date'),
         'po_date': fields.date('PO Date'),
-        'po_currency_id' : fields.many2one('res.currency', "Currency", required=True,help="The currency the field is expressed in."),
+        'po_currency_id' : fields.many2one('res.currency', "Currency", required=False,help="The currency the field is expressed in."),
         'po_amount': fields.integer('PO Amount'),
         'pre_po_amount': fields.integer('Pre-PO Amount'),
         'pm_user_id': fields.many2one('res.users', 'Project Manager'),
@@ -320,7 +321,8 @@ class sale_order(osv.osv):
         'incharge_client' : fields.char('In-charge Client'),
         'cp_number' : fields.char('CP Number'),
         'date_tax' : fields.date('Date of Tax Convention Number'),
-        'jccc_resources' : fields.boolean('Has JCCC Resources ')
+        'jccc_resources' : fields.boolean('Has JCCC Resources '),
+        'customer_code' : fields.char('Customer Code')
     }
 
     _defaults = {
@@ -440,8 +442,30 @@ class sale_order(osv.osv):
                 defaults.update(delivery_onchange['value'])
             vals = dict(defaults, **vals)
         ctx = dict(context or {}, mail_create_nolog=True)
+
+        projects = []
+        if vals['sap_project_code']:
+            projects = self.pool.get('project.project').search(cr, uid, [('sap_project_code', '=', vals['sap_project_code'])], context=context)
+            print projects
+            if projects:
+                vals['po_project_id'] = projects[0]
+        customers = []
+        if vals['customer_code']:
+            customers = self.pool.get('res.partner').search(cr, uid, [('customer_code', '=', vals['customer_code'])], context=context)
+            print customers
+            if customers:
+                vals['partner_id'] = customers[0]
+        departments = []
+        if vals['nti_bu_code']:
+            departments = self.pool.get('hr.department').search(cr, uid, [('department_code', '=', vals['nti_bu_code'])], context=context)
+            print departments
+            if departments:
+                vals['nti_bu'] = departments[0]
+
         new_id = super(sale_order, self).create(cr, uid, vals, context=ctx)
-        self.pool.get('project.project').write(cr, uid,[vals['po_project_id']],{'sale_orders':[(4,new_id)]},context = context)
+
+        if vals['po_project_id']:
+            self.pool.get('project.project').write(cr, uid,[vals['po_project_id']],{'sale_orders':[(4,new_id)]},context = context)
         self.message_post(cr, uid, [new_id], body=_("Quotation created"), context=ctx)
         return new_id
 
