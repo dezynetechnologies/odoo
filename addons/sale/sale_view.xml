@@ -64,6 +64,7 @@
                     <field name="date_order"/>
                     <field name="partner_id"/>
                     <field name="user_id"/>
+                    <field name="po_amount" sum="Total Pay Order Amount"/>
                     <field name="amount_total" sum="Total Tax Included"/>
                     <field name="state"/>
                 </tree>
