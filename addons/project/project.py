@@ -535,7 +535,7 @@ class project(osv.osv):
                                                  string = "Resource Allocation Sheet", copy=False,states={'close': [('readonly', True)], 'cancelled': [('readonly', True)]}),
         # 'sale_orders': fields.many2one('sale.order', 'Sale Orders'),
         'department_id': fields.many2one('hr.department', 'Department'),
-        'billing_rate_card_id' : fields.many2one('project.billing.rate.card','Billing Rate Card',required=True),
+        'billing_rate_card_id' : fields.many2one('project.billing.rate.card','Billing Rate Card',required=False),
         'doc_count': fields.function(
             _get_attached_docs, string="Number of documents attached", type='integer'
         )
