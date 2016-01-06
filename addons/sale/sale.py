@@ -239,8 +239,8 @@ class sale_order(osv.osv):
         'date_order': fields.datetime('Date', required=True, readonly=True, select=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, copy=False),
         'create_date': fields.datetime('Creation Date', readonly=True, select=True, help="Date on which sales order is created."),
         'date_confirm': fields.date('Confirmation Date', readonly=True, select=True, help="Date on which sales order is confirmed.", copy=False),
-        'user_id': fields.many2one('res.users', 'Account Manager'),
-        #'user_id': fields.many2one('res.users', 'Salesperson', states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, select=True, track_visibility='onchange'),
+        #'user_id': fields.many2one('res.users', 'Account Manager'),
+        'user_id': fields.many2one('res.users', 'Salesperson', states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, select=True, track_visibility='onchange'),
         'partner_id': fields.many2one('res.partner', 'Customer', readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, required=False, change_default=True, select=True, track_visibility='always'),
         'partner_invoice_id': fields.many2one('res.partner', 'Invoice Address', readonly=True, required=False, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Invoice address for current sales order."),
         'partner_shipping_id': fields.many2one('res.partner', 'Delivery Address', readonly=True, required=False, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}, help="Delivery address for current sales order."),
@@ -308,6 +308,7 @@ class sale_order(osv.osv):
         'po_amount': fields.integer('PO Amount'),
         'pre_po_amount': fields.integer('Pre-PO Amount'),
         'pm_user_id': fields.many2one('res.users', 'Project Manager'),
+        'am_user_id': fields.many2one('res.users', 'Account Manager'),
         'sap_project_code': fields.char('SAP Project Code'),
         'po_start': fields.date('PO Start'),
         'po_end': fields.date('PO End'),
@@ -340,7 +341,7 @@ class sale_order(osv.osv):
     }
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Order Reference must be unique per Company!'),
-        ('name_po_no', 'unique(po_no)', 'Purchase Order No. must be unique across the collection!'),
+        #('name_po_no', 'unique(po_no)', 'Purchase Order No. must be unique across the collection!'),
     ]
     _order = 'date_order desc, id desc'
 

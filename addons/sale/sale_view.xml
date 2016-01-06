@@ -45,7 +45,7 @@
                     <field name="name" string="Order Number"/>
                     <field name="date_order"/>
                     <field name="partner_id"/>
-                    <field name="user_id"/>
+                    <field name="am_user_id"/>
                     <field name="amount_total" sum="Total Tax Included"/>
                     <field name="tax_category"/>
                     <field name="state"/>
@@ -63,7 +63,7 @@
                     <field name="name" string="Order Number"/>
                     <field name="date_order"/>
                     <field name="partner_id"/>
-                    <field name="user_id"/>
+                    <field name="am_user_id"/>
                     <field name="po_amount" sum="Total Pay Order Amount"/>
                     <field name="amount_total" sum="Total Tax Included"/>
                     <field name="state"/>
@@ -148,12 +148,14 @@
                             <field name="client_order_ref"/>
                             <field domain="[('type','=','sale')]" name="pricelist_id" groups="product.group_sale_pricelist" on_change="onchange_pricelist_id(pricelist_id,order_line)"/>
                             <field name="currency_id" invisible="1"/>
+                            <field name="customer_code" invisible="1"/>
                         </group>
 			<group>
                 <field name="po_no"/>
                 <field name="po_name"/>
                 <field name="po_project_id" domain="[('partner_id','=',partner_id)]" context="{'partner_id':partner_id}"/>
                 <field name="nti_bu"/>
+                <field name="nti_bu_code" invisible="1"/>
                 <field name="client_bu"/>
                 <field name="client_div"/>
                 <field name="sales_loc"/>
@@ -173,7 +175,8 @@
 			    <field name="payment_due_date"/>
 			</group>
 			<group>
-			    <field name="user_id"/>
+			    <field name="user_id" invisible="1"/>
+                <field name="am_user_id"/>
 			    <field name="pm_user_id"/>
                 <field name="incharge_nti"/>
                 <field name="incharge_client"/>
