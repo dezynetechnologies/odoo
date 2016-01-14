@@ -53,6 +53,7 @@ class hr_payslip_nec(osv.osv):
     _columns = {
         'onsite_allowance' : fields.integer('Onsite Allowance',required=True),
         'offshore_salary' : fields.integer('Offshore Salary',required=True),
+        'jobtitle_id': fields.char('Job Title'),
         'currency_id' : fields.many2one('res.currency', "Currency", required=True, help="The currency the field is expressed in."),
 
     }
@@ -69,6 +70,17 @@ class hr_payslip_nec(osv.osv):
             vals.update({'offshore_salary': context.get('offshore_salary')})
         if 'currency_id' in context:
             vals.update({'currency_id': context.get('currency_id')})
+        employees = []
+        employee = False
+        if vals['employee_no']:
+            employees = self.pool.get('hr.employee').search(cr, uid, [('employee_no', '=', vals['employee_no'])], context=context)
+            if len(employees) > 0 :
+                employee = self.pool.get('hr.employee').browse(cr, uid, employees[0], context=context)
+                print employee
+                vals['employee_id'] = employees[0]
+                vals['department_id'] = employee.department_id.id
+                vals['jobtitle_id'] = employee.jobtitle_id
+
         vals.update({'state': 'draft'})
         vals.update({'basic_pay': 0})
         return super(hr_payslip_nec, self).create(cr, uid, vals, context=context)
