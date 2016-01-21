@@ -17,6 +17,7 @@
                     <!--<field name="number"/> -->
                     <field name="employee_id"/>
                     <field name="employee_no"/>
+                    <field name="jobtitle_id"/>
                     <field name="state" invisible="1"/>
                     <field name="date_from"/>
                     <field name="date_to"/>
@@ -53,8 +54,8 @@
                         <field name="onsite_allowance"/>
                         <field name="offshore_salary"/>
 			            <field name="currency_id"/>
-			            <field name="job_id"/>
-                        <field name="jobtitle_id" invisible="1"/>
+			            <field name="job_id" invisible="1"/>
+                        <field name="jobtitle_id"/>
                     </group>
                     </sheet>
                 </form>
