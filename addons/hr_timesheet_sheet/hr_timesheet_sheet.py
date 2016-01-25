@@ -91,6 +91,17 @@ class hr_timesheet_sheet(osv.osv):
         if vals.get('attendances_ids'):
             # If attendances, we sort them by date asc before writing them, to satisfy the alternance constraint
             vals['attendances_ids'] = self.sort_attendances(cr, uid, vals['attendances_ids'], context=context)
+        #Bulk Upload Support for employee_id and department_id
+        employees = []
+        employee = False
+        if vals['employee_no']:
+            employees = self.pool.get('hr.employee').search(cr, uid, [('employee_no', '=', vals['employee_no'])], context=context)
+            print employees
+            if len(employees) > 0:
+                vals['employee_id'] = employees[0]
+                employee = self.pool.get('hr.employee').browse(cr, uid, employees[0], context=context)
+                vals['department_id'] = employee.department_id
+
         new_id = super(hr_timesheet_sheet, self).create(cr, uid, vals, context=context)
         self.pool.get('project.project').write(cr, uid,[vals['project_id']],{'resource_allocations':[(4,new_id)]},context = context)
         return new_id
@@ -217,7 +228,7 @@ class hr_timesheet_sheet(osv.osv):
         'billing_perc': fields.integer('Billing',help="Billing percentage (0 to 100)"),
         'allocation_perc': fields.integer('Allocation',help="Allocation percentage (0 to 100) for the period"),
         'monthly_billing_rate':fields.integer('Monthly Billing Rate',help="Monthly billing rate for the given employee and period.",required=True),
-        'currency_id' : fields.many2one('res.currency', "Currency", required=True, help="The currency the field is expressed in."),
+        'currency_id' : fields.many2one('res.currency', "Billing Currency", required=True, help="The currency the field is expressed in."),
         #'project_role' : fields.selection(_project_role_selection,'Project Role',required=True),
         'project_role' : fields.many2one('project.billing.rate','Project Role',required=True),
         'billing_rate_card_id' : fields.many2one('project.billing.rate.card','Billing Rate Card',required=True),
