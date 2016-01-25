@@ -161,7 +161,7 @@ class project_specific_expenses(osv.osv):
         #'category':fields.selection([('software_cost','Software Cost'),('hardware_cost','Hardware Cost')],string="Expense Type"),
         'category' : fields.char('Expense Type', required=True),
         'sap_project_code' : fields.char('SAP Project Code', required=True),
-        'date': fields.date('Date', required=True, select=1, readonly=False),
+        'date': fields.date('Billed Date', required=True, select=1, readonly=False),
         'exp_cost':fields.integer('Actual Cost'),
         'exp_currency_id' : fields.many2one('res.currency', "Actual Currency", required=True,help="The currency the field is expressed in."),
         'billable_cost':fields.integer('Billable Cost'),
