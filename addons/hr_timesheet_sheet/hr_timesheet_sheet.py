@@ -99,9 +99,15 @@ class hr_timesheet_sheet(osv.osv):
             print employees
             if len(employees) > 0:
                 vals['employee_id'] = employees[0]
+                print vals
                 employee = self.pool.get('hr.employee').browse(cr, uid, employees[0], context=context)
-                vals['department_id'] = employee.department_id
-
+                vals['department_id'] = employee.department_id.id
+                print vals
+        if vals['sap_project_code']:
+            projects = self.pool.get('project.project').search(cr, uid, [('sap_project_code', '=', vals['sap_project_code'])], context=context)
+            print projects
+            if projects:
+                vals['project_id'] = projects[0]
         new_id = super(hr_timesheet_sheet, self).create(cr, uid, vals, context=context)
         self.pool.get('project.project').write(cr, uid,[vals['project_id']],{'resource_allocations':[(4,new_id)]},context = context)
         return new_id
@@ -190,7 +196,7 @@ class hr_timesheet_sheet(osv.osv):
     _columns = {
         'name': fields.char('Note', select=1,
                             states={'confirm':[('readonly', True)], 'done':[('readonly', True)]}),
-        'employee_id': fields.many2one('hr.employee', 'Employee', required=True),
+        'employee_id': fields.many2one('hr.employee', 'Employee'),
         'employee_no': fields.related('employee_id', 'employee_no', type="char", store=True, string="Employee No", required=True, readonly=False),
         'user_id': fields.related('employee_id', 'user_id', type="many2one", relation="res.users", store=True, string="User", required=False, readonly=True),#fields.many2one('res.users', 'User', required=True, select=1, states={'confirm':[('readonly', True)], 'done':[('readonly', True)]}),
         'date_from': fields.date('Date from', required=True, select=1, readonly=True, states={'new':[('readonly', False)]}),
@@ -217,10 +223,10 @@ class hr_timesheet_sheet(osv.osv):
         'period_ids': fields.one2many('hr_timesheet_sheet.sheet.day', 'sheet_id', 'Period', readonly=True),
         'account_ids': fields.one2many('hr_timesheet_sheet.sheet.account', 'sheet_id', 'Analytic accounts', readonly=True),
         'company_id': fields.many2one('res.company', 'Company'),
-        'department_id':fields.many2one('hr.department','Department',required=True),
+        'department_id':fields.many2one('hr.department','Department'),
         'timesheet_activity_count': fields.function(_count_all, type='integer', string='Timesheet Activities', multi=True),
         'attendance_count': fields.function(_count_all, type='integer', string="Attendances", multi=True),
-        'project_id': fields.many2one('project.project','Project',required=True),
+        'project_id': fields.many2one('project.project','Project'),
         'sap_project_code': fields.char('SAP Project Code'),
         'second_level': fields.char('Second Level Tracking'),
         'geography':fields.selection([('offon','offon'),('offshore','offshore')],'Geography'),
@@ -228,10 +234,10 @@ class hr_timesheet_sheet(osv.osv):
         'billing_perc': fields.integer('Billing',help="Billing percentage (0 to 100)"),
         'allocation_perc': fields.integer('Allocation',help="Allocation percentage (0 to 100) for the period"),
         'monthly_billing_rate':fields.integer('Monthly Billing Rate',help="Monthly billing rate for the given employee and period.",required=True),
-        'currency_id' : fields.many2one('res.currency', "Billing Currency", required=True, help="The currency the field is expressed in."),
+        'currency_id' : fields.many2one('res.currency', "Billing Currency", help="The currency the field is expressed in."),
         #'project_role' : fields.selection(_project_role_selection,'Project Role',required=True),
-        'project_role' : fields.many2one('project.billing.rate','Project Role',required=True),
-        'billing_rate_card_id' : fields.many2one('project.billing.rate.card','Billing Rate Card',required=True),
+        'project_role' : fields.many2one('project.billing.rate','Project Role'),
+        'billing_rate_card_id' : fields.many2one('project.billing.rate.card','Billing Rate Card'),
         'opening_wip_bill_curr' : fields.float('Opening WIP(Billing Currency)'),
         'opening_wip_inr' : fields.float('Opening WIP(INR)'),
         'closing_wip_bill_curr' : fields.float('Closing WIP(Billing Currency)'),
@@ -328,7 +334,7 @@ class hr_timesheet_sheet(osv.osv):
 
 
     _constraints = [
-        (_sheet_date, 'You cannot have 2 timesheets that overlap!\nPlease use the menu \'My Current Timesheet\' to avoid this problem.', ['date_from','date_to']),
+        #(_sheet_date, 'You cannot have 2 timesheets that overlap!\nPlease use the menu \'My Current Timesheet\' to avoid this problem.', ['date_from','date_to']),
     ]
 
     def action_set_to_draft(self, cr, uid, ids, *args):
