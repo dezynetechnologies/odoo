@@ -80,7 +80,7 @@ class sale_report(osv.osv):
                          LIMIT 1) AS date_end
                     FROM res_currency_rate r
                 )
-             SELECT min(l.id) as id,
+             SELECT row_number() OVER() AS id, 
                     s.name as name,
                     s.po_no as po_no,
                     s.jbo_project_code as jbo_project_code,
@@ -121,17 +121,8 @@ class sale_report(osv.osv):
 
     def _from(self):
         from_str = """
-                sale_order_line l
-                      join sale_order s on (l.order_id=s.id)
-                      join sale_invoice si on (s.id = si.order_id)
-                        left join product_product p on (l.product_id=p.id)
-                            left join product_template t on (p.product_tmpl_id=t.id)
-                    left join product_uom u on (u.id=l.product_uom)
-                    left join product_uom u2 on (u2.id=t.uom_id)
-                    left join product_pricelist pp on (s.pricelist_id = pp.id)
-                    join currency_rate cr on (cr.currency_id = pp.currency_id and
-                        cr.date_start <= coalesce(s.date_order, now()) and
-                        (cr.date_end is null or cr.date_end > coalesce(s.date_order, now())))
+                      sale_order s
+                      left join sale_invoice si on (s.id = si.order_id)
         """
         return from_str
 
