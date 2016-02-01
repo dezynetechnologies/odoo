@@ -17,9 +17,9 @@
                     <field name="total_offshore_mm" type="measure"/>
                     <field name="total_offon_mm" type="measure"/>
                     <field name="total_mm" type="measure"/>
-                    <field name="offshore_billed_util" type="measure"/>
+                    <!--field name="offshore_billed_util" type="measure"/>
                     <field name="offon_billed_util" type="measure"/>
-                    <field name="combined_billed_util" type="measure"/>
+                    <field name="combined_billed_util" type="measure"/-->
                     <field name="timed_utilisation" type="measure"/>
                 </graph>
             </field>
