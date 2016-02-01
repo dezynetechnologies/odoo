@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 <data>
-
     <record id="view_order_product_graph" model="ir.ui.view">
          <field name="name">sale.report.graph</field>
          <field name="model">sale.report</field>
          <field name="arch" type="xml">
-             <graph string="Sales Analysis" type="pivot" stacked="True">
+             <graph string="Sales Analysis" type="pivot" stacked="False">
                  <!--field name="name" type="row"/>
                  <field name="date" interval="month" type="col"/-->
                  <field name="name" type="measure"/>
@@ -20,7 +19,7 @@
                  <field name="po_amount" type="measure"/>
                  <field name="po_project_id" type="measure"/>
                  <field name="jbo_project_code" type="measure"/>
-                 <field name="user_id" type="measure"/>
+                 <field name="am_user_id" type="measure"/>
                  <field name="pm_user_id" type="measure"/>
                  <field name="incharge_nti" type="measure"/>
                  <field name="nti_bu" type="measure"/>
@@ -45,20 +44,63 @@
              </graph>
          </field>
     </record>
+    <record id="view_order_product_tree" model="ir.ui.view">
+         <field name="name">sale.report.tree</field>
+         <field name="model">sale.report</field>
+         <field name="arch" type="xml">
+             <tree string="Sales Analysis" create="false">
+                 <!--field name="name" type="row"/>
+                 <field name="date" interval="month" type="col"/-->
+                 <field name="name"/>
+                 <field name="po_no"/>
+                 <field name="po_name"/>
+                 <field name="sales_loc"/>
+                 <field name="delivery_due_date"/>
+                 <field name="actual_delivery_date"/>
+                 <field name="pre_po_date"/>
+                 <field name="date"/>
+                 <field name="po_amount"/>
+                 <field name="po_project_id"/>
+                 <field name="jbo_project_code"/>
+                 <field name="am_user_id"/>
+                 <field name="pm_user_id"/>
+                 <field name="incharge_nti"/>
+                 <field name="nti_bu"/>
+                 <field name="sap_project_code"/>
+                 <field name="partner_id"/>
+                 <field name="client_bu"/>
+                 <field name="client_div"/>
+                 <field name="incharge_client"/>
+                 <field name="po_start"/>
+                 <field name="po_end"/>
+                 <field name="al_date"/>
+                 <field name="tax_category"/>
+                 <field name="date_tax"/>
+                 <field name="cp_number"/>
+                 <field name="jccc_resources"/>
+                 <field name="invoice_number"/>
+                 <field name="invoice_date"/>
+                 <field name="invoice_billed"/>
+                 <field name="shipping_invoice_number"/>
+                 <field name="payment_due_date"/>
+                 <field name="payment_date"/>
+             </tree>
+         </field>
+    </record>
 
     <!-- Custom reports (aka filters) -->
     <record id="filter_sale_report_salespersons" model="ir.filters">
         <field name="name">By Account Manager</field>
         <field name="model_id">sale.report</field>
-        <field name="user_id" eval="False"/>
+        <field name="am_user_id" eval="False"/>
         <field name="pm_user_id" eval="False"/>
         <field name="po_project_id" eval="False"/>
-        <field name="context">{'group_by': ['date:month', 'user_id']}</field>
+        <field name="context">{'group_by': ['date:month', 'am_user_id']}</field>
     </record>
     <record id="filter_sale_report_managers" model="ir.filters">
         <field name="name">By Project Manager</field>
         <field name="model_id">sale.report</field>
-        <field name="user_id" eval="False"/>
+        <field name="am_user_id" eval="False"/>
         <field name="pm_user_id" eval="False"/>
         <field name="po_project_id" eval="False"/>
         <field name="context">{'group_by': ['date:month', 'pm_user_id']}</field>
@@ -67,7 +109,7 @@
     <record id="filter_sale_report_salesteam" model="ir.filters">
         <field name="name">By Salesteam</field>
         <field name="model_id">sale.report</field>
-        <field name="user_id" eval="False"/>
+        <field name="am_user_id" eval="False"/>
         <field name="pm_user_id" eval="False"/>
         <field name="po_project_id" eval="False"/>
         <field name="context">{'group_by': ['date:month', 'section_id']}</field>
@@ -75,7 +117,7 @@
     <record id="filter_isale_report_project" model="ir.filters">
         <field name="name">By Project</field>
         <field name="model_id">sale.report</field>
-        <field name="user_id" eval="False"/>
+        <field name="am_user_id" eval="False"/>
         <field name="pm_user_id" eval="False"/>
         <field name="po_project_id" eval="False"/>
         <field name="context">{'group_by': ['date:month', 'po_project_id']}</field>
@@ -87,23 +129,24 @@
             <search string="Sales Analysis">
                 <field name="date"/>
                 <filter string="This Year" name="year" invisible="1" domain="[('date','&lt;=', time.strftime('%%Y-12-31')),('date','&gt;=',time.strftime('%%Y-01-01'))]"/>
-                <!-- <filter name="Quotations" domain="[('state','in',('draft'))]"/> -->
                 <separator/>
-                <filter string="My Sales" help="My Sales" domain="[('user_id','=',uid)]"/>
+                <filter string="My Sales" help="My Sales" domain="[('am_user_id','=',uid)]"/>
                 <field name="partner_id"/>
-                <field name="user_id"/>
+                <field name="am_user_id"/>
                 <field name="pm_user_id"/>
                 <field name="po_project_id"/>
                 <group expand="0" string="Extended Filters">
-                    <!--field name="company_id" groups="base.group_multi_company"/-->
                 </group>
                 <group expand="1" string="Group By">
-                    <filter string="Account Manager" name="User" context="{'group_by':'user_id'}"/>
+                    <filter string="SO Number" name="SO Number" context="{'group_by':'name'}"/>
+                    <!--
+                    <filter string="Account Manager" name="User" context="{'group_by':'am_user_id'}"/>
                     <filter string="Project Manager" name="User" context="{'group_by':'pm_user_id'}"/>
                     <filter string="Project" name="Project" context="{'group_by':'po_project_id'}"/>
                     <filter string="Customer" name="Customer" context="{'group_by':'partner_id'}"/>
                     <separator/>
                     <filter string="Order Month" context="{'group_by':'date:month'}" help="Ordered date of the sales order"/>
+                    -->
                 </group>
             </search>
         </field>
@@ -113,10 +156,11 @@
         <field name="name">Sales Analysis</field>
         <field name="res_model">sale.report</field>
         <field name="view_type">form</field>
-        <field name="view_mode">graph</field>
+        <field name="view_mode">tree</field>
         <field name="search_view_id" ref="view_order_product_search"/>
-        <field name="view_id" ref="view_order_product_graph"/>
-        <field name="context">{'search_default_Sales':1, 'group_by_no_leaf':1,'group_by':[]}</field>
+        <field name="view_id" ref="view_order_product_tree"/>
+        <!--field name="context">{'search_default_Sales':1, 'group_by_no_leaf':1,'group_by':[]}</field-->
+        <field name="context">{'search_default_Sales':1}</field>
         <field name="help">This report performs analysis on your sales orders. Analysis check your sales revenues and sort it by different group criteria (salesman, partner, product, etc.) Use this report to perform analysis on sales not having invoiced yet. If you want to analyse your turnover, you should use the Invoice Analysis report in the Accounting application.</field>
     </record>
 
