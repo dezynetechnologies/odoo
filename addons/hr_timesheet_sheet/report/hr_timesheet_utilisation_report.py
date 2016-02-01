@@ -58,11 +58,11 @@ class hr_timesheet_utilisation_report(osv.osv):
                     t.department_id as department_id,
                     t.date_from as date,
 
-		            case when t.billed_status::text = 'billed' then ( case when t.geography::text = 'offshore' then ( ((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100*100) ) else 0::numeric end) else  0::numeric  end as offshore_billed_mm,
+		            case when t.billing_perc != 0 then ( case when t.geography::text = 'offshore' then ( ((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100*100) ) else 0::numeric end) else  0::numeric  end as offshore_billed_mm,
 
-		            case when t.billed_status::text = 'billed' then ( case when t.geography::text = 'offon' then ( ((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100*100) ) else 0::numeric end) else  0::numeric  end as offon_billed_mm,
+		            case when t.billing_perc != 0 then ( case when t.geography::text = 'offon' then ( ((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100*100) ) else 0::numeric end) else  0::numeric  end as offon_billed_mm,
 
-                    case when t.billed_status::text = 'billed' then (((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100*100) ) else 0::numeric end as total_billed_mm,
+                    case when t.billing_perc != 0 then (((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100*100) ) else 0::numeric end as total_billed_mm,
 
 
                     case when t.geography::text = 'offshore' then ( (t.date_to - t.date_from + 1)*t.allocation_perc/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) ) else 0::numeric end as total_offshore_mm,
@@ -71,7 +71,8 @@ class hr_timesheet_utilisation_report(osv.osv):
 
                     ((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) as total_mm,
 
-			        ((t.date_to - t.date_from + 1)*t.allocation_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) as timed_utilisation,
+
+			        ((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) as timed_utilisation,
                     t.project_id as project_id
         """
         return select_str
