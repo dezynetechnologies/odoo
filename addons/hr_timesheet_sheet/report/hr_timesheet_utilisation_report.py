@@ -82,10 +82,10 @@ class hr_timesheet_utilisation_report(osv.osv):
 			        case when t.billing_perc != 0 then ( (((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)))/(((t.date_to - t.date_from + 1)*t.allocation_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)))) else 0::numeric end as combined_billed_util1,
 
 			        ((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) as timed_utilisation1,
-			        to_char(AVG (offon_billed_util1),'99999999999999999D99') AS offon_billed_util,
-			        to_char(AVG (offshore_billed_util1),'99999999999999999D99') AS offshore_billed_util,
-			        to_char(AVG (combined_billed_util1),'99999999999999999D99') AS combined_billed_util,
-			        to_char(AVG (timed_billed_util1),'99999999999999999D99') AS timed_billed_util,
+			        to_char(AVG (case when t.billing_perc != 0 then ( case when t.geography::text = 'offshore' then ((((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)))/(((t.date_to - t.date_from + 1)*t.allocation_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))) ) else 0::numeric end) else 0::numeric end),'99999999999999999D99') AS offshore_billed_util,
+			        to_char(AVG (case when t.billing_perc != 0 then ( case when t.geography::text = 'offon' then ((((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)))/(((t.date_to - t.date_from + 1)*t.allocation_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))) ) else 0::numeric end) else 0::numeric end),'99999999999999999D99') AS offon_billed_util,
+			        to_char(AVG (case when t.billing_perc != 0 then ( (((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)))/(((t.date_to - t.date_from + 1)*t.allocation_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)))) else 0::numeric end),'99999999999999999D99') AS combined_billed_util,
+			        to_char(AVG (((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100)),'99999999999999999D99') AS timed_billed_util,
                     t.project_id as project_id
         """
         return select_str
