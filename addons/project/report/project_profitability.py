@@ -58,8 +58,8 @@ class project_profitability_report(osv.osv):
         SUM(revenue_inr - exp_cost - direct_cost_inr) as gross_profit_inr,
         SUM(sga_inr) as sga_inr,
         SUM(revenue_inr - exp_cost - direct_cost_inr - sga_inr) as operating_profit_inr,
-        AVG(((revenue_inr - exp_cost - direct_cost_inr)*100)/(revenue_inr)) as gross_profit_perc,
-        AVG(((revenue_inr - exp_cost - direct_cost_inr-sga_inr)*100)/(revenue_inr)) as oper_profit_perc,
+        AVG(case when revenue !=0 then ((revenue_inr - exp_cost - direct_cost_inr)*100)/(revenue_inr) else 0::numeric end) as gross_profit_perc,
+        AVG(case when revenue !=0 then ((revenue_inr - exp_cost - direct_cost_inr-sga_inr)*100)/(revenue_inr) else  0::numericend) as oper_profit_perc,
         date
         """
         return select_str
