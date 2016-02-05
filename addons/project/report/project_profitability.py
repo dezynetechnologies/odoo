@@ -31,77 +31,126 @@ class project_profitability_report(osv.osv):
 
     _columns = {
         'name': fields.char("Name", required=True),
+        'project_id': fields.many2one('project.project','Project'),
+        'sap_project_code' : fields.char('SAP Project Code'),
         'employee_id': fields.many2one('hr.employee', 'Employee', readonly=True),
         'employee_no': fields.char('Employee No'),
-        'revenue' : fields.integer('Revenue(INR)'),
-        'direct_cost' : fields.integer('Direct Cost(INR)'),
-        'gross_profit': fields.integer('Gross Profit(INR)'),
-        'sga' : fields.integer('SGA(INR)'),
-        'operating_profit' : fields.integer('Operating Profit(INR)'),
+        'revenue_inr' : fields.float('Revenue(INR)'),
+        'direct_cost_inr' : fields.float('Direct Cost(INR)'),
+        'gross_profit_inr': fields.float('Gross Profit(INR)'),
+        'sga_inr' : fields.float('SGA(INR)'),
+        'operating_profit_inr' : fields.float('Operating Profit(INR)'),
         'gross_profit_perc' : fields.float('Gross Profit(%)'),
         'oper_profit_perc' : fields.float('Operating Profit(%)'),
-        'department_id':fields.many2one('hr.department','Department',readonly=True),
-        'date_from': fields.date('Date from',readonly=True,),
-        'date_to': fields.date('Date to',readonly=True),
-        'project_id': fields.many2one('project.project','Project'),
-        'pay' : fields.integer('Pay(cost)'),
-        'billing' : fields.integer('Billing'),
-        'profit' : fields.integer('Gross Profit'),
-        'profit_percentage' : fields.float('Profit Percentage'),
+        'date': fields.date('Month',readonly=True),
         }
-    _order = 'name asc'
+    _order = 'sap_project_code asc'
 
     def _select(self):
         select_str = """
-             SELECT min(e.id) as id,
-                    e.name_related as name,
-                    e.id as employee_id,
-                    t.department_id as department_id,
-                    t.date_from as date_from,
-                    t.date_to as date_to,
-                    t.project_id as project_id,
-                    t.billing_perc as billing_perc,
-                    t.allocation_perc as allocation_perc,
-                    ( t.date_to - t.date_from + 1) as num_of_days,
-                    date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) as total_days,
-		    (0::numeric) as sga,
-                    ((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )as direct_cost,
-                    ((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) ) as revenue,
-                    ( (((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) - (((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) ) as gross_profit,
-                    ( (((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) - (((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) ) as operating_profit,
-                    case when t.billed_status::text = 'billed' then ((( (((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) - (((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) )
-)*100/(((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) ) else 0::numeric end as gross_profit_perc,
-                    case when t.billed_status::text = 'billed' then ((( (((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) - (((p.basic_pay * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) )
-)*100/(((t.monthly_billing_rate * ( t.date_to - t.date_from + 1))/ date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) )) ) else 0::numeric end as oper_profit_perc
-
-
+        SELECT row_number() OVER() AS id,
+        BIG.employee_id as employee_id,
+        BIG.employee_no as employee_no,
+        BIG.project_id as project_id,
+        BIG.sap_project_code as sap_project_code,
+        SUM(revenue_inr) as revenue_inr,
+        SUM(exp_cost + direct_cost_inr) as direct_cost_inr,
+        SUM(revenue_inr - exp_cost - direct_cost_inr) as gross_profit_inr,
+        SUM(sga_inr) as sga_inr,
+        SUM(revenue_inr - exp_cost - direct_cost_inr - sga_inr) as operating_profit_inr,
+        AVG(((revenue_inr - exp_cost - direct_cost_inr)*100)/(revenue_inr)) as gross_profit_perc,
+        AVG(((revenue_inr - exp_cost - direct_cost_inr-sga_inr)*100)/(revenue_inr)) as oper_profit_perc,
+        date
         """
         return select_str
 
     def _from(self):
         from_str = """
-                hr_employee e
-                    left join hr_timesheet_sheet_sheet t on e.id = t.employee_id
-                    left join public.hr_payslip p on
-                        t.employee_id = p.employee_id  and t.date_from = p.date_from
+            (SELECT employee_id,employee_no, project_id,sap_project_code,SUM(revenue_inr) as revenue_inr,SUM(exp_cost) as exp_cost,date,SUM(sga_inr) as sga_inr,SUM(direct_cost_inr) as direct_cost_inr
+
+                FROM (
+                SELECT employee_id,employee_no,project_id,sap_project_code,billable_cost as revenue_inr,exp_cost,date, 0 as sga_inr, 0 as direct_cost_inr
+
+                FROM (
+
+                SELECT null as employee_id,'' as employee_no,project_id,sap_project_code,exp_cost,billable_cost,date,category  from project_specific_expenses
+
+                UNION ALL
+
+                SELECT employee_id,employee_no,project_id,sap_project_code,exp_cost,billable_cost,date,category  from project_employee_expenses
+
+                ) AS ASD
+                UNION ALL
+            (SELECT
+
+                employee_id,employee_no,project_id,sap_project_code,SUM(revenue_inr) as revenue_inr,
+
+                SUM(case when geography::text = 'offon' then (offon_mm/total_offon_mm)*onsite_allowance + (offon_mm/total_mm)*offshore_salary else (offshore_mm/total_mm)*offshore_salary end) as exp_cost,date,
+                SUM(case when geography::text = 'offon' then (offon_mm/total_mm)*sga_inr else (offshore_mm/total_mm)*sga_inr end) as sga_inr,
+                SUM(case when geography::text = 'offon' then (offon_mm/total_mm)*direct_cost_inr else (offshore_mm/total_mm)*direct_cost_inr end) as direct_cost_inr
+
+                FROM
+
+                (
+
+                SELECT
+
+                t.employee_id,t.employee_no,t.project_id,t.sap_project_code,t.revenue_inr,t.geography,date_trunc('month',t.date_from)::date as date,
+
+                    case when t.geography::text = 'offshore' then ( (t.date_to - t.date_from + 1)*t.allocation_perc/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) ) else 0::numeric end as offshore_mm,
+
+                    case when t.geography::text = 'offon' then ( (t.date_to - t.date_from + 1)*t.allocation_perc/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) ) else 0::numeric end as offon_mm,
+
+                total_mm,total_offshore_mm,total_offon_mm,offshore_salary,onsite_allowance,pps.amount as sga_inr,pps1.amount as direct_cost_inr
+
+                FROM
+
+                hr_timesheet_sheet_sheet t
+
+                left join
+
+                (SELECT employee_id,SUM(total_offshore_mm) as total_offshore_mm,SUM(total_offon_mm) as total_offon_mm,SUM(total_mm) as total_mm,date FROM
+
+                (
+
+                SELECT employee_id,project_id,sap_project_code,revenue_inr,geography,date_trunc('month',date_from)::date as date,
+
+                    ((date_to - date_from + 1)*allocation_perc)/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))*100) as total_mm,
+
+                    case when geography::text = 'offshore' then ( (date_to - date_from + 1)*allocation_perc/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))*100) ) else 0::numeric end as total_offshore_mm,
+
+                    case when geography::text = 'offon' then ( (date_to - date_from + 1)*allocation_perc/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))*100) ) else 0::numeric end as total_offon_mm
+
+                FROM hr_timesheet_sheet_sheet ) AS ss GROUP BY employee_id,date ) as tp on tp.employee_id=t.employee_id and tp.date=date_trunc('month',t.date_from)::date
+
+                left join
+
+                hr_payslip_nec as ps on tp.employee_id=ps.employee_id and tp.date=date_trunc('month',ps.date_from)::date
+
+                left join
+
+                project_expenses as pps on date_trunc('month',ps.date_from)::date = date_trunc('month',pps.date_from)::date and pps.nti_unit = (SELECT parent_id FROM hr_department WHERE id=t.department_id) and category = 'sga'
+
+                left join
+
+                project_expenses as pps1 on date_trunc('month',ps.date_from)::date = date_trunc('month',pps1.date_from)::date and pps1.nti_unit = (SELECT parent_id FROM hr_department WHERE id=t.department_id) and pps1.category = 'direct_cost'
+
+                ) AS FOO GROUP BY employee_id,employee_no,project_id,date,sap_project_code
+
+                )
+
+                ) AS BIGG GROUP BY employee_id,employee_no,project_id,date,sap_project_code) AS BIG
+
         """
         return from_str
 
     def _group_by(self):
         group_by_str = """
-            GROUP BY e.id,
-                    t.date_from,
-                    t.date_to,
-                    t.department_id,
-                    t.geography,
-                    t.billed_status,
-                    t.project_id,
-                    t.project_role,
-                    t.billing_perc,
-                    t.allocation_perc,
-                    p.basic_pay,
-                    t.monthly_billing_rate
-
+        GROUP BY BIG.employee_id,
+                 BIG.employee_no,
+                 BIG.project_id,
+                 BIG.date,
+                 BIG.sap_project_code
         """
         return group_by_str
 
@@ -110,12 +159,12 @@ class project_profitability_report(osv.osv):
         tools.drop_view_if_exists(cr, self._table)
         print("""CREATE or REPLACE VIEW %s as (
             %s
-            FROM ( %s )
+            FROM  %s
             %s
             )""" % (self._table, self._select(), self._from(), self._group_by()))
         cr.execute("""CREATE or REPLACE VIEW %s as (
             %s
-            FROM ( %s )
+            FROM  %s
             %s
             )""" % (self._table, self._select(), self._from(), self._group_by()))
 

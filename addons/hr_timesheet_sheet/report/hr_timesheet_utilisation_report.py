@@ -30,7 +30,6 @@ class hr_timesheet_utilisation_report(osv.osv):
     _rec_name = 'date'
 
     _columns = {
-        'name': fields.char("Name", required=True),
         'employee_id': fields.many2one('hr.employee', 'Employee', readonly=True),
         'employee_no': fields.char('Employee No'),
         'offshore_billed_mm' : fields.float('Offshore Billed Man Months'),
@@ -47,13 +46,12 @@ class hr_timesheet_utilisation_report(osv.osv):
         'project_id':  fields.many2one('project.project','Project'),
         'date' : fields.date('Date'),
         }
-    _order = 'name asc'
+    _order = 'employee_no asc'
 
     def _select(self):
         select_str = """
         SELECT ss.id as id,
                ss.employee_id as employee_id,
-               ss.name as name,
                ss.employee_no as employee_no,
                ss.department_id as department_id,
                ss.date as date,
@@ -73,39 +71,26 @@ class hr_timesheet_utilisation_report(osv.osv):
 
     def _from(self):
         from_str = """
-                (SELECT min(e.id) as id,
-                    e.name_related as name,
+                (SELECT row_number() OVER() AS id,
                     e.id as employee_id,
                     e.employee_no as employee_no,
                     t.department_id as department_id,
                     t.date_from as date,
-
+                    t.project_id as project_id,
 		            case when t.billing_perc != 0 then ( case when t.geography::text = 'offshore' then ( ((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100*100) ) else 0::numeric end) else  0::numeric  end as offshore_billed_mm,
-
 		            case when t.billing_perc != 0 then ( case when t.geography::text = 'offon' then ( ((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100*100) ) else 0::numeric end) else  0::numeric  end as offon_billed_mm,
-
                     case when t.billing_perc != 0 then (((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100*100) ) else 0::numeric end as total_billed_mm,
-
-
                     case when t.geography::text = 'offshore' then ( (t.date_to - t.date_from + 1)*t.allocation_perc/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) ) else 0::numeric end as total_offshore_mm,
-
                     case when t.geography::text = 'offon' then ( (t.date_to - t.date_from + 1)*t.allocation_perc/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) ) else 0::numeric end as total_offon_mm,
-
                     ((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) as total_mm,
-
                     case when t.billing_perc != 0 then ( case when t.geography::text = 'offshore' then ((((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)))/(((t.date_to - t.date_from + 1)*t.allocation_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))) )*((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) else 0::numeric end) else 0::numeric end as offshore_billed_util,
-
 			        case when t.billing_perc != 0 then ( case when t.geography::text = 'offon' then ((((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)))/(((t.date_to - t.date_from + 1)*t.allocation_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))) )*((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) else 0::numeric end) else 0::numeric end as offon_billed_util,
-
 			        case when t.billing_perc != 0 then ( (((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)))/(((t.date_to - t.date_from + 1)*t.allocation_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))))*((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) else 0::numeric end as combined_billed_util,
+			        ((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) as timed_utilisation
 
-			        ((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) as timed_utilisation,
-
-                    t.project_id as project_id
                     FROM
                 hr_employee e
-                    left join hr_timesheet_sheet_sheet t on e.id=t.employee_id GROUP BY e.id,
-                    e.name_related,
+                    join hr_timesheet_sheet_sheet t on e.id=t.employee_id GROUP BY e.id,
                     e.employee_no,
                     t.date_from,
                     t.date_to,
@@ -121,7 +106,6 @@ class hr_timesheet_utilisation_report(osv.osv):
     def _group_by(self):
         group_by_str = """
             GROUP BY ss.id,
-                    ss.name,
                     ss.employee_no,
                     ss.employee_id,
                     ss.date,
@@ -135,7 +119,7 @@ class hr_timesheet_utilisation_report(osv.osv):
         tools.drop_view_if_exists(cr, self._table)
         print("""CREATE or REPLACE VIEW %s as (
             %s
-            FROM ( %s )
+            FROM  %s
             %s
             )""" % (self._table, self._select(), self._from(), self._group_by()))
         cr.execute("""CREATE or REPLACE VIEW %s as (

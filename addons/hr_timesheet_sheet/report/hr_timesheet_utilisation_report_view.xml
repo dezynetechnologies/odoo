@@ -5,7 +5,7 @@
             <field name="name">timesheet.utilisation.report.graph</field>
             <field name="model">hr.timesheet.utilisation.report</field>
             <field name="arch" type="xml">
-                <graph string="Resource Utilisation" type="pivot">
+                <graph string="Resource Utilisation" type="pivot" stacked="False">
                     <!--field name="employee_id" type="row"/>
                     <field name="date" interval="month" type="col"/-->
                     <!--field name="name" type="measure"/>

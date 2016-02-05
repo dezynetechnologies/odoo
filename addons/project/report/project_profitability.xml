@@ -12,11 +12,11 @@
                     <field name="pay" type="measure"/>
                     <field name="billing" type="measure"/>
                     <field name="profit" type="measure"/-->
-                    <field name="revenue" type="measure"/>
-                    <field name="direct_cost" type="measure"/>
-                    <field name="gross_profit" type="measure"/>
-                    <field name="sga" type="measure"/>
-                    <field name="operating_profit" type="measure"/>
+                    <field name="revenue_inr" type="measure"/>
+                    <field name="direct_cost_inr" type="measure"/>
+                    <field name="gross_profit_inr" type="measure"/>
+                    <field name="sga_inr" type="measure"/>
+                    <field name="operating_profit_inr" type="measure"/>
                     <field name="gross_profit_perc" type="measure"/>
                     <field name="oper_profit_perc" type="measure"/>
                 </graph>
@@ -45,8 +45,8 @@
             <field name="arch" type="xml">
                 <search string="Project Profitability">
                     <field name="employee_id"/>
-                    <field name="pay"/>
-                    <field name="profit"/>
+                    <field name="project_id"/>
+                    <!--field name="profit"/-->
                     <!--<filter string="This Month" name="month" domain="[('date','&lt;=', time.strftime('%Y-%m-%d')),('date','&gt;=',time.strftime('%Y-%m-01'))]" help="month"/> -->
                     <!-- <group expand="0" string="Extended Filters...">
                         <field name="general_account_id"/>
@@ -57,8 +57,8 @@
                     </group> -->
                     <group expand="1" string="Group By">
                         <filter string="Project" context="{'group_by':'project_id'}"/>
-                        <filter string="NTI Unit" context="{'group_by':'department_id'}"/>
-                        <filter string="NTI BU" context="{'group_by':'department_id'}"/>
+                        <filter string="Employee" context="{'group_by':'employee_id'}"/>
+                        <!--filter string="NTI BU" context="{'group_by':'department_id'}"/-->
                         <!--<filter string="Month" context="{'group_by':'date:month'}" help="Group by month of date"/>-->
                     </group>
                 </search>
