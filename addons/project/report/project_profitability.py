@@ -30,7 +30,6 @@ class project_profitability_report(osv.osv):
     #_rec_name = 'date'
 
     _columns = {
-        'name': fields.char("Name", required=True),
         'project_id': fields.many2one('project.project','Project'),
         'sap_project_code' : fields.char('SAP Project Code'),
         'employee_id': fields.many2one('hr.employee', 'Employee', readonly=True),
