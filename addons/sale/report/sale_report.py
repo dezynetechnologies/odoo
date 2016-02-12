@@ -65,7 +65,8 @@ class sale_report(osv.osv):
         'invoice_billed' : fields.integer('Invoice billed(JPY)'),
         'shipping_invoice_number' : fields.char('Shipping Invoice Number'),
         'payment_due_date': fields.date('Payment Due Date'),
-        'payment_date': fields.date('Payment Date')
+        'payment_date': fields.date('Payment Date'),
+        'company_id': fields.many2one('res.company', 'Company', readonly=True)
     }
     _order = 'date desc'
 
@@ -87,6 +88,7 @@ class sale_report(osv.osv):
                     s.incharge_nti as incharge_nti,
                     s.incharge_client as incharge_client,
                     s.cp_number as cp_number,
+                    s.company_id as company_id,
                     s.date_tax as date_tax,
                     s.jccc_resources as jccc_resources,
                     s.po_name as po_name,
@@ -161,7 +163,8 @@ class sale_report(osv.osv):
                      si.amount,
                      si.shipping_number,
                      s.payment_due_date,
-                     s.payment_date
+                     s.payment_date,
+                     s.company_id
 
         """
         return group_by_str
