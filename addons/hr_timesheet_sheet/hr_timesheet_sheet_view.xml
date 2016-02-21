@@ -122,6 +122,7 @@
                             <field name="monthly_billing_rate"/>
                             <field name="currency_id"/>
 			                <field name="billing_perc"/>
+                            <field name="revenue_inr"/>
                         </group>
                     </group>
                     <!--notebook>
@@ -382,6 +383,7 @@
                     <field name="billed_status"/>
                     <field name="billing_perc"/>
                     <field name="geography"/>
+                    <field name="revenue_inr"/>
                     <field name="state"/>
                 </tree>
             </field>

@@ -84,9 +84,9 @@ class project_profitability_report(osv.osv):
 
                 employee_id,employee_no,project_id,sap_project_code,SUM(revenue_inr) as revenue_inr,
 
-                SUM(case when geography::text = 'offon' then (offon_mm/total_offon_mm)*onsite_allowance + (offon_mm/total_mm)*offshore_salary else (offshore_mm/total_mm)*offshore_salary end) as exp_cost,date,
-                SUM(case when geography::text = 'offon' then (offon_mm/total_mm)*sga_inr else (offshore_mm/total_mm)*sga_inr end) as sga_inr,
-                SUM(case when geography::text = 'offon' then (offon_mm/total_mm)*direct_cost_inr else (offshore_mm/total_mm)*direct_cost_inr end) as direct_cost_inr
+                SUM(case when total_mm = 0 then (onsite_allowance + offshore_salary) else (case when geography::text = 'offon' then (offon_mm/total_offon_mm)*onsite_allowance + (offon_mm/total_mm)*offshore_salary else (offshore_mm/total_mm)*offshore_salary end) end) as exp_cost,date,
+                SUM(case when total_mm = 0 then 0 else (case when geography::text = 'offon' then (offon_mm/total_mm)*sga_inr else (offshore_mm/total_mm)*sga_inr end) end) as sga_inr,
+                SUM(case when total_mm = 0 then 0 else (case when geography::text = 'offon' then (offon_mm/total_mm)*direct_cost_inr else (offshore_mm/total_mm)*direct_cost_inr end) end) as direct_cost_inr
 
                 FROM
 
