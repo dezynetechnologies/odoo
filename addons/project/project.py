@@ -578,6 +578,7 @@ class project(osv.osv):
                                    ('close', 'Closed')],
                                   'Status', required=True, copy=False),
         'sap_project_code': fields.char('SAP Project Code'),
+        'department_code': fields.char('Department Code'),
         'project_status': fields.selection(
             [('passive', 'Passive'), ('active', 'Active'), ('suspended', 'Suspended'), ('completed', 'Completed'),
              ('cancelled', 'Cancelled')], 'Project Status', copy=False),
@@ -841,6 +842,7 @@ def Project():
         if vals.get('type', False) not in ('template', 'contract'):
             vals['type'] = 'contract'
 
+
         project_id = super(project, self).create(cr, uid, vals, context=create_context)
         project_rec = self.browse(cr, uid, project_id, context=context)
         self.pool.get('mail.alias').write(cr, uid, [project_rec.alias_id.id], {'alias_parent_thread_id': project_id,
@@ -850,6 +852,14 @@ def Project():
 
     def write(self, cr, uid, ids, vals, context=None):
         # if alias_model has been changed, update alias_model_id accordingly
+        nti_units = []
+        nti_unit = False
+        if vals.get('department_code'):
+            nti_units = self.pool.get('hr.department').search(cr, uid, [('department_code', '=', vals.get('department_code'))], context=context)
+            if len(nti_units) > 0 :
+                #nti_unit = self.pool.get('hr.employee').browse(cr, uid, employees[0], context=context)
+                vals.update(department_id = nti_units[0])
+                print vals
         if vals.get('alias_model'):
             model_ids = self.pool.get('ir.model').search(cr, uid,
                                                          [('model', '=', vals.get('alias_model', 'project.task'))])
