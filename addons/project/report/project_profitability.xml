@@ -17,8 +17,8 @@
                     <field name="gross_profit_inr" type="measure"/>
                     <field name="sga_inr" type="measure"/>
                     <field name="operating_profit_inr" type="measure"/>
-                    <field name="gross_profit_perc" type="measure"/>
-                    <field name="oper_profit_perc" type="measure"/>
+                    <field name="gross_profit_perc" type="measure" group_operator ="avg"/>
+                    <field name="oper_profit_perc" type="measure" group_operator ="avg"/>
                 </graph>
             </field>
         </record>
@@ -58,8 +58,8 @@
                     <group expand="1" string="Group By">
                         <filter string="Project" context="{'group_by':'project_id'}"/>
                         <filter string="Employee" context="{'group_by':'employee_id'}"/>
-                        <!--filter string="NTI BU" context="{'group_by':'department_id'}"/-->
-                        <!--<filter string="Month" context="{'group_by':'date:month'}" help="Group by month of date"/>-->
+                        <filter string="Department" context="{'group_by':'department_id'}"/>
+                        <filter string="Month" context="{'group_by':'date:month'}" help="Group by month of date"/>
                     </group>
                 </search>
 
