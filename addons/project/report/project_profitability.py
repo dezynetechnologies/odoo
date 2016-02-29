@@ -32,6 +32,8 @@ class project_profitability_report(osv.osv):
     _columns = {
         'project_id': fields.many2one('project.project','Project'),
         'department_id': fields.many2one('hr.department','Department',readonly=True),
+        'department_name' : fields.char('Business Unit'),
+        'nti_unit' : fields.many2one('hr.department','NTI Unit',readonly=True),
         'sap_project_code' : fields.char('SAP Project Code'),
         'employee_id': fields.many2one('hr.employee', 'Employee', readonly=True),
         'employee_no': fields.char('Employee No'),
@@ -52,8 +54,10 @@ class project_profitability_report(osv.osv):
         BIG.employee_id as employee_id,
         BIG.employee_no as employee_no,
         BIG.project_id as project_id,
-        (select department_id from project_project where id = project_id) as department_id,
         BIG.sap_project_code as sap_project_code,
+        (select department_id from project_project where id = project_id) as department_id,
+        (SELECT name from hr_department where id = (select department_id from project_project where id = project_id)) as department_name,
+        (case when (select parent_id from hr_department where id = (select department_id from project_project where id = BIG.project_id) ) is null then (select department_id from project_project where id = BIG.project_id) else (select parent_id from hr_department where id = (select department_id from project_project where id = BIG.project_id) ) end ) as nti_unit,
         SUM(revenue_inr) as revenue_inr,
         SUM(exp_cost + direct_cost_inr) as direct_cost_inr,
         SUM(revenue_inr - exp_cost - direct_cost_inr) as gross_profit_inr,
@@ -152,6 +156,7 @@ class project_profitability_report(osv.osv):
                  BIG.project_id,
                  BIG.date,
                  department_id,
+                 department_name,
                  BIG.sap_project_code
         """
         return group_by_str

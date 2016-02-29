@@ -91,5 +91,6 @@ The Dashboard for the Sales Manager will include
     'installable': True,
     'auto_install': False,
     'application': True,
+    'css': ['static/css/my_css.css'],
 }
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

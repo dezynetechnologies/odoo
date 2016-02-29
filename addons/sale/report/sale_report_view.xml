@@ -1,54 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 <data>
+    <template id="assets_backend" name="sale assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                <link rel="stylesheet" href="/sale/static/css/my_css.css"/>
+                <!--<script type="text/javascript" src="/you_module_name/static/src/js/you_module_name.js"></script>-->
+            </xpath>
+    </template>
+
     <record id="view_order_product_graph" model="ir.ui.view">
          <field name="name">sale.report.graph</field>
          <field name="model">sale.report</field>
          <field name="arch" type="xml">
              <graph string="Sales Analysis" type="pivot" stacked="False">
-                 <!--field name="name" type="row"/>
-                 <field name="date" interval="month" type="col"/-->
-                 <field name="name" type="measure"/>
-                 <field name="po_no" type="measure"/>
-                 <field name="po_name" type="measure"/>
-                 <field name="sales_loc" type="measure"/>
-                 <field name="delivery_due_date" type="measure"/>
-                 <field name="actual_delivery_date" type="measure"/>
-                 <field name="pre_po_date" type="measure"/>
-                 <field name="date" type="measure"/>
-                 <field name="po_amount" type="measure"/>
-                 <field name="po_project_id" type="measure"/>
-                 <field name="jbo_project_code" type="measure"/>
-                 <field name="am_user_id" type="measure"/>
-                 <field name="pm_user_id" type="measure"/>
-                 <field name="incharge_nti" type="measure"/>
-                 <field name="nti_bu" type="measure"/>
-                 <field name="sap_project_code" type="measure"/>
-                 <field name="partner_id" type="measure"/>
-                 <field name="client_bu" type="measure"/>
-                 <field name="client_div" type="measure"/>
-                 <field name="incharge_client" type="measure"/>
-                 <field name="po_start" type="measure"/>
-                 <field name="po_end" type="measure"/>
-                 <field name="al_date" type="measure"/>
-                 <field name="tax_category" type="measure"/>
-                 <field name="date_tax" type="measure"/>
-                 <field name="cp_number" type="measure"/>
-                 <field name="jccc_resources" type="measure"/>
-                 <field name="invoice_number" type="measure"/>
-                 <field name="invoice_date" type="measure"/>
-                 <field name="invoice_billed" type="measure"/>
-                 <field name="shipping_invoice_number" type="measure"/>
-                 <field name="payment_due_date" type="measure"/>
-                 <field name="payment_date" type="measure"/>
-             </graph>
-         </field>
-    </record>
-    <record id="view_order_product_tree" model="ir.ui.view">
-         <field name="name">sale.report.tree</field>
-         <field name="model">sale.report</field>
-         <field name="arch" type="xml">
-             <tree string="Sales Analysis" create="false">
                  <!--field name="name" type="row"/>
                  <field name="date" interval="month" type="col"/-->
                  <field name="name"/>
@@ -59,7 +23,7 @@
                  <field name="actual_delivery_date"/>
                  <field name="pre_po_date"/>
                  <field name="date"/>
-                 <field name="po_amount"/>
+                 <field name="po_amount" type="measure"/>
                  <field name="po_project_id"/>
                  <field name="jbo_project_code"/>
                  <field name="am_user_id"/>
@@ -80,7 +44,50 @@
                  <field name="jccc_resources"/>
                  <field name="invoice_number"/>
                  <field name="invoice_date"/>
-                 <field name="invoice_billed"/>
+                 <field name="invoice_billed" type="measure"/>
+                 <field name="shipping_invoice_number"/>
+                 <field name="payment_due_date"/>
+                 <field name="payment_date"/>
+             </graph>
+         </field>
+    </record>
+    <record id="view_order_product_tree" model="ir.ui.view">
+         <field name="name">sale.report.tree</field>
+         <field name="model">sale.report</field>
+         <field name="arch" type="xml">
+             <tree string="Sales Analysis" create="false" class="my_class">
+                 <!--field name="name" type="row"/>
+                 <field name="date" interval="month" type="col"/-->
+                 <field name="name"/>
+                 <field name="po_no"/>
+                 <field name="po_name"/>
+                 <field name="sales_loc"/>
+                 <field name="delivery_due_date"/>
+                 <field name="actual_delivery_date"/>
+                 <field name="pre_po_date"/>
+                 <field name="date"/>
+                 <field name="po_amount" sum="total"/>
+                 <field name="po_project_id"/>
+                 <field name="jbo_project_code"/>
+                 <field name="am_user_id"/>
+                 <field name="pm_user_id"/>
+                 <field name="incharge_nti"/>
+                 <field name="nti_bu"/>
+                 <field name="sap_project_code"/>
+                 <field name="partner_id"/>
+                 <field name="client_bu"/>
+                 <field name="client_div"/>
+                 <field name="incharge_client"/>
+                 <field name="po_start"/>
+                 <field name="po_end"/>
+                 <field name="al_date"/>
+                 <field name="tax_category"/>
+                 <field name="date_tax"/>
+                 <field name="cp_number"/>
+                 <field name="jccc_resources"/>
+                 <field name="invoice_number"/>
+                 <field name="invoice_date"/>
+                 <field name="invoice_billed" sum="total"/>
                  <field name="shipping_invoice_number"/>
                  <field name="payment_due_date"/>
                  <field name="payment_date"/>
@@ -106,14 +113,14 @@
         <field name="context">{'group_by': ['date:month', 'pm_user_id']}</field>
     </record>
 
-    <record id="filter_sale_report_salesteam" model="ir.filters">
+    <!--record id="filter_sale_report_salesteam" model="ir.filters">
         <field name="name">By Salesteam</field>
         <field name="model_id">sale.report</field>
         <field name="am_user_id" eval="False"/>
         <field name="pm_user_id" eval="False"/>
         <field name="po_project_id" eval="False"/>
         <field name="context">{'group_by': ['date:month', 'section_id']}</field>
-    </record>
+    </record-->
     <record id="filter_isale_report_project" model="ir.filters">
         <field name="name">By Project</field>
         <field name="model_id">sale.report</field>
@@ -139,14 +146,14 @@
                 </group>
                 <group expand="1" string="Group By">
                     <filter string="SO Number" name="SO Number" context="{'group_by':'name'}"/>
-                    <!--
                     <filter string="Account Manager" name="User" context="{'group_by':'am_user_id'}"/>
                     <filter string="Project Manager" name="User" context="{'group_by':'pm_user_id'}"/>
                     <filter string="Project" name="Project" context="{'group_by':'po_project_id'}"/>
                     <filter string="Customer" name="Customer" context="{'group_by':'partner_id'}"/>
+                    <filter string="Sales Location" name="Customer" context="{'group_by':'sales_loc'}"/>
+                    <filter string="NTI BU" name="Customer" context="{'group_by':'nti_bu'}"/>
                     <separator/>
                     <filter string="Order Month" context="{'group_by':'date:month'}" help="Ordered date of the sales order"/>
-                    -->
                 </group>
             </search>
         </field>
@@ -164,7 +171,20 @@
         <field name="help">This report performs analysis on your sales orders. Analysis check your sales revenues and sort it by different group criteria (salesman, partner, product, etc.) Use this report to perform analysis on sales not having invoiced yet. If you want to analyse your turnover, you should use the Invoice Analysis report in the Accounting application.</field>
     </record>
 
+    <record id="action_order_report_all_new" model="ir.actions.act_window">
+        <field name="name">Sales Analysis(Pivot Table)</field>
+        <field name="res_model">sale.report</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">graph</field>
+        <field name="search_view_id" ref="view_order_product_search"/>
+        <field name="view_id" ref="view_order_product_graph"/>
+        <field name="context">{'search_default_Sales':1, 'group_by_no_leaf':1,'group_by':['name']}</field>
+        <field name="help">This report performs analysis on your sales orders. Analysis check your sales revenues and sort it by different group criteria (salesman, partner, product, etc.) Use this report to perform analysis on sales not having invoiced yet. If you want to analyse your turnover, you should use the Invoice Analysis report in the Accounting application.</field>
+    </record>
+
+
     <menuitem action="action_order_report_all" id="menu_report_product_all" parent="base.next_id_64" sequence="10"/>
+    <menuitem action="action_order_report_all_new" id="menu_report_product_all_new" parent="base.next_id_64" sequence="11"/>
 
 </data>
 </openerp>

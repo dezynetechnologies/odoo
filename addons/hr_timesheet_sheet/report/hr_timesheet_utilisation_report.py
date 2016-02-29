@@ -38,11 +38,13 @@ class hr_timesheet_utilisation_report(osv.osv):
         'total_offshore_mm' : fields.float('Total Offshore Man Months'),
         'total_offon_mm' : fields.float('Total Offon Man Months'),
         'total_mm' : fields.float('Total Man Months'),
-        'offshore_billed_util' : fields.float('Offshore Billed Utilisation(%)',group_operator = 'avg'),
-        'offon_billed_util' : fields.float('Offon Billed Utilisation(%)',group_operator = 'avg'),
-        'combined_billed_util' : fields.float('Combined Billed Utilisation(%)',group_operator = 'avg'),
-        'timed_utilisation' : fields.float('Timed Utilisation(%)',group_operator = 'avg'),
-        'department_id': fields.many2one('hr.department','Department',readonly=True),
+        'offshore_billed_util' : fields.float('Offshore Billed Utilisation(%)',group_operator='sum'),
+        'offon_billed_util' : fields.float('Offon Billed Utilisation(%)',group_operator='sum'),
+        'combined_billed_util' : fields.float('Combined Billed Utilisation(%)',group_operator='sum'),
+        'timed_utilisation' : fields.float('Timed Utilisation(%)'),
+        'department_id': fields.many2one('hr.department','Business Unit',readonly=True),
+        'department_name' : fields.char('Business Unit Name',readonly=True),
+        'nti_unit' : fields.many2one('hr.department','NTI Unit',readonly=True),
         'project_id':  fields.many2one('project.project','Project'),
         'date' : fields.date('Date'),
         }
@@ -54,18 +56,20 @@ class hr_timesheet_utilisation_report(osv.osv):
                ss.employee_id as employee_id,
                ss.employee_no as employee_no,
                ss.department_id as department_id,
+               (SELECT name from hr_department where id = department_id) as department_name,
+               (case when ss.parent_deptt_id is null then ss.department_id else ss.parent_deptt_id end) as nti_unit,
                ss.date as date,
                ss.project_id as project_id,
-               AVG (ss.offshore_billed_mm) as offshore_billed_mm,
-               AVG (ss.offon_billed_mm) as offon_billed_mm,
-               AVG (ss.total_billed_mm) as total_billed_mm,
-               AVG (ss.total_offshore_mm) as total_offshore_mm,
-               AVG (ss.total_offon_mm) as total_offon_mm,
-               AVG (ss.total_mm) as total_mm,
-               AVG (ss.offshore_billed_util) as offshore_billed_util,
-               AVG (ss.offon_billed_util) as offon_billed_util,
-               AVG (ss.combined_billed_util) as combined_billed_util,
-               AVG (ss.timed_utilisation) as timed_utilisation
+               SUM (ss.offshore_billed_mm) as offshore_billed_mm,
+               SUM (ss.offon_billed_mm) as offon_billed_mm,
+               SUM (ss.total_billed_mm) as total_billed_mm,
+               SUM (ss.total_offshore_mm) as total_offshore_mm,
+               SUM (ss.total_offon_mm) as total_offon_mm,
+               SUM (ss.total_mm) as total_mm,
+               case when sum(ss.total_mm) = 0 then 0::numeric else sum(ss.offshore_billed_util * ss.total_mm) / sum(ss.total_mm) end as offshore_billed_util,
+               case when sum(ss.total_mm) = 0 then 0::numeric else sum(ss.offon_billed_util * ss.total_mm) / sum(ss.total_mm) end as offon_billed_util,
+               case when sum(ss.total_mm) = 0 then 0::numeric else sum(ss.combined_billed_util * ss.total_mm) / sum(ss.total_mm) end as combined_billed_util,
+               case when sum(ss.total_mm) = 0 then 0::numeric else sum(ss.timed_utilisation * ss.total_mm) / sum(ss.total_mm) end  as timed_utilisation
         """
         return select_str
 
@@ -74,7 +78,8 @@ class hr_timesheet_utilisation_report(osv.osv):
                 (SELECT row_number() OVER() AS id,
                     e.id as employee_id,
                     e.employee_no as employee_no,
-                    t.department_id as department_id,
+                    e.department_id as department_id,
+                    (select parent_id from hr_department where id = e.department_id ) as parent_deptt_id,
                     t.date_from as date,
                     t.project_id as project_id,
 		            case when t.billing_perc != 0 then ( case when t.geography::text = 'offshore' then ( ((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100*100) ) else 0::numeric end) else  0::numeric  end as offshore_billed_mm,
@@ -83,10 +88,10 @@ class hr_timesheet_utilisation_report(osv.osv):
                     case when t.geography::text = 'offshore' then ( (t.date_to - t.date_from + 1)*t.allocation_perc/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) ) else 0::numeric end as total_offshore_mm,
                     case when t.geography::text = 'offon' then ( (t.date_to - t.date_from + 1)*t.allocation_perc/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) ) else 0::numeric end as total_offon_mm,
                     ((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) as total_mm,
-                    case when t.billing_perc != 0 then ( case when t.geography::text = 'offshore' then ((((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)))/(((t.date_to - t.date_from + 1)*t.allocation_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))) )*((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) else 0::numeric end) else 0::numeric end as offshore_billed_util,
-			        case when t.billing_perc != 0 then ( case when t.geography::text = 'offon' then ((((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)))/(((t.date_to - t.date_from + 1)*t.allocation_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))) )*((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) else 0::numeric end) else 0::numeric end as offon_billed_util,
-			        case when t.billing_perc != 0 then ( (((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)))/(((t.date_to - t.date_from + 1)*t.allocation_perc)/date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))))*((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) else 0::numeric end as combined_billed_util,
-			        ((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) as timed_utilisation
+                    case when t.billing_perc != 0 then ( case when t.geography::text = 'offshore' then ((((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100*100))/(((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100)) )*100 else 0::numeric end) else 0::numeric end as offshore_billed_util,
+			        case when t.billing_perc != 0 then ( case when t.geography::text = 'offon' then  ((((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100*100))/(((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100)) )*100   else 0::numeric end) else 0::numeric end as offon_billed_util,
+			        case when t.billing_perc != 0 then  ((((t.date_to - t.date_from + 1)*t.allocation_perc*t.billing_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100*100))/(((t.date_to - t.date_from + 1)*t.allocation_perc)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100)) )*100  else 0::numeric end as combined_billed_util,
+				    (case when (select sap_project_code from project_project where id = t.project_id) = 'bench' then 0::numeric else t.allocation_perc end) as timed_utilisation
 
                     FROM
                 hr_employee e
@@ -110,6 +115,8 @@ class hr_timesheet_utilisation_report(osv.osv):
                     ss.employee_id,
                     ss.date,
                     ss.department_id,
+                    department_name,
+                    nti_unit,
                     ss.project_id
         """
         return group_by_str
