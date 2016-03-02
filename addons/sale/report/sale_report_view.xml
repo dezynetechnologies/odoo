@@ -67,6 +67,7 @@
                  <field name="pre_po_date"/>
                  <field name="date"/>
                  <field name="po_amount" sum="total"/>
+                 <field name="po_currency_id"/>
                  <field name="po_project_id"/>
                  <field name="jbo_project_code"/>
                  <field name="am_user_id"/>
@@ -150,7 +151,8 @@
                     <filter string="Project Manager" name="User" context="{'group_by':'pm_user_id'}"/>
                     <filter string="Project" name="Project" context="{'group_by':'po_project_id'}"/>
                     <filter string="Customer" name="Customer" context="{'group_by':'partner_id'}"/>
-                    <filter string="Sales Location" name="Customer" context="{'group_by':'sales_loc'}"/>
+                    <filter string="Sales Location" name="Sales Location" context="{'group_by':'sales_loc'}"/>
+                    <filter string="PO Currency" name="Currency" context="{'group_by':'po_currency_id'}"/>
                     <filter string="NTI BU" name="Customer" context="{'group_by':'nti_bu'}"/>
                     <separator/>
                     <filter string="Order Month" context="{'group_by':'date:month'}" help="Ordered date of the sales order"/>
