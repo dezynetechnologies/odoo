@@ -120,9 +120,9 @@ class project_profitability_report(osv.osv):
 
                 t.employee_id,t.employee_no,t.project_id,t.sap_project_code,t.revenue_inr,t.geography,date_trunc('month',t.date_from)::date as date,
 
-                    case when t.geography::text = 'offshore' then ( (t.date_to - t.date_from + 1)*t.allocation_perc/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) ) else 0::numeric end as offshore_mm,
+                    case when t.geography::text = 'offshore' then ( (t.date_to - t.date_from + 1)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))) ) else 0::numeric end as offshore_mm,
 
-                    case when t.geography::text = 'offon' then ( (t.date_to - t.date_from + 1)*t.allocation_perc/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))*100) ) else 0::numeric end as offon_mm,
+                    case when t.geography::text = 'offon' then ( (t.date_to - t.date_from + 1)/(date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to))) ) else 0::numeric end as offon_mm,
 
                 total_mm,total_offshore_mm,total_offon_mm,offshore_salary,onsite_allowance,pps.amount as sga_inr,pps1.amount as direct_cost_inr
 
@@ -138,11 +138,11 @@ class project_profitability_report(osv.osv):
 
                 SELECT employee_id,project_id,sap_project_code,revenue_inr,geography,date_trunc('month',date_from)::date as date,
 
-                    ((date_to - date_from + 1)*allocation_perc)/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))*100) as total_mm,
+                    (date_to - date_from + 1)/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))) as total_mm,
 
-                    case when geography::text = 'offshore' then ( (date_to - date_from + 1)*allocation_perc/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))*100) ) else 0::numeric end as total_offshore_mm,
+                    case when geography::text = 'offshore' then ( (date_to - date_from + 1)/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))) ) else 0::numeric end as total_offshore_mm,
 
-                    case when geography::text = 'offon' then ( (date_to - date_from + 1)*allocation_perc/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))*100) ) else 0::numeric end as total_offon_mm
+                    case when geography::text = 'offon' then ( (date_to - date_from + 1)/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))) ) else 0::numeric end as total_offon_mm
 
                 FROM hr_timesheet_sheet_sheet ) AS ss GROUP BY employee_id,date ) as tp on tp.employee_id=t.employee_id and tp.date=date_trunc('month',t.date_from)::date
 
@@ -152,11 +152,11 @@ class project_profitability_report(osv.osv):
 
                 left join
 
-                project_expenses as pps on date_trunc('month',ps.date_from)::date = date_trunc('month',pps.date_from)::date and pps.nti_unit = (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = tp.employee_id)) and category = 'sga'
+                project_expenses as pps on date_trunc('month',ps.date_from)::date = date_trunc('month',pps.date_from)::date and pps.nti_unit = (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = t.employee_id)) and pps.category = 'sga'
 
                 left join
 
-                project_expenses as pps1 on date_trunc('month',ps.date_from)::date = date_trunc('month',pps1.date_from)::date and pps1.nti_unit = (SELECT parent_id FROM hr_department WHERE id = (select department_id from hr_employee where id = tp.employee_id)) and pps1.category = 'direct_cost'
+                project_expenses as pps1 on date_trunc('month',ps.date_from)::date = date_trunc('month',pps1.date_from)::date and pps1.nti_unit = (SELECT parent_id FROM hr_department WHERE id = (select department_id from hr_employee where id = t.employee_id)) and pps1.category = 'direct_cost'
 
                 ) AS FOO GROUP BY employee_id,employee_no,project_id,date,sap_project_code
 
