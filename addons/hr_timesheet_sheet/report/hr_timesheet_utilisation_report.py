@@ -50,6 +50,47 @@ class hr_timesheet_utilisation_report(osv.osv):
         }
     _order = 'employee_no asc'
 
+    def search(self, cr, uid, args, offset=0, limit=None, order=None,
+            context=None, count=False):
+        print cr
+        print uid
+        print count
+        for arg in args:
+            print arg
+        return super(hr_timesheet_utilisation_report, self).search(cr, uid, args=args, offset=offset, limit=limit, order=order,
+            context=context, count=count)
+
+
+    def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False,lazy=True):
+        if context is None:
+            context = {}
+        print "read_group() called"
+        ret_val =  super(hr_timesheet_utilisation_report, self).read_group(cr, uid, domain, fields, groupby, offset, limit, context, orderby,lazy)
+        for retv in ret_val:
+            print retv
+            if retv['total_mm'] == 0:
+                retv['timed_utilisation'] = retv['timed_utilisation']
+            else:
+                retv['timed_utilisation'] = (retv['total_billed_mm']/retv['total_mm'])*100
+
+            if retv['total_mm'] == 0:
+                retv['combined_billed_util'] = retv['combined_billed_util']
+            else:
+                retv['combined_billed_util'] = (retv['total_billed_mm']/retv['total_mm'])*100
+
+            if retv['total_offshore_mm'] == 0:
+                retv['offshore_billed_util'] = retv['offshore_billed_util']
+            else:
+                retv['offshore_billed_util'] = (retv['offshore_billed_mm']/retv['total_offshore_mm'])*100
+
+            if retv['total_offon_mm'] == 0:
+                retv['offon_billed_util'] = retv['offon_billed_util']
+            else:
+                retv['offon_billed_util'] = (retv['offon_billed_mm']/retv['total_offon_mm'])*100
+
+        return ret_val
+
+
     def _select(self):
         select_str = """
         SELECT ss.id as id,
