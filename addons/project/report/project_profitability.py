@@ -43,11 +43,27 @@ class project_profitability_report(osv.osv):
         'gross_profit_inr': fields.float('Gross Profit(INR)',digits=(32,0)),
         'sga_inr' : fields.float('SGA(INR)',digits=(32,0)),
         'operating_profit_inr' : fields.float('Operating Profit(INR)',digits=(32,0)),
-        'gross_profit_perc' : fields.float('Gross Profit(%)',group_operator = 'avg'),
-        'oper_profit_perc' : fields.float('Operating Profit(%)',group_operator = 'avg'),
+        'gross_profit_perc' : fields.float('Gross Profit(%)',group_operator = 'sum'),
+        'oper_profit_perc' : fields.float('Operating Profit(%)',group_operator = 'sum'),
         'date': fields.date('Month',readonly=True),
         }
     _order = 'sap_project_code asc'
+
+    def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False,lazy=True):
+        if context is None:
+            context = {}
+        print "read_group() called"
+        ret_val =  super(project_profitability_report, self).read_group(cr, uid, domain, fields, groupby, offset, limit, context, orderby,lazy)
+        for retv in ret_val:
+            print retv
+            if retv['revenue_inr'] == 0:
+                retv['gross_profit_perc'] = retv['gross_profit_perc']
+                retv['oper_profit_perc']  = retv['oper_profit_perc']
+            else:
+                retv['gross_profit_perc'] = (retv['gross_profit_inr']/retv['revenue_inr'])*100
+                retv['oper_profit_perc'] = (retv['operating_profit_inr']/retv['revenue_inr'])*100
+
+        return ret_val
 
     def _select(self):
         select_str = """
