@@ -152,11 +152,11 @@ class project_profitability_report(osv.osv):
 
                 left join
 
-                project_expenses as pps on date_trunc('month',ps.date_from)::date = date_trunc('month',pps.date_from)::date and pps.nti_unit = (SELECT parent_id FROM hr_department WHERE id=t.department_id) and category = 'sga'
+                project_expenses as pps on date_trunc('month',ps.date_from)::date = date_trunc('month',pps.date_from)::date and pps.nti_unit = (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = tp.employee_id)) and category = 'sga'
 
                 left join
 
-                project_expenses as pps1 on date_trunc('month',ps.date_from)::date = date_trunc('month',pps1.date_from)::date and pps1.nti_unit = (SELECT parent_id FROM hr_department WHERE id=t.department_id) and pps1.category = 'direct_cost'
+                project_expenses as pps1 on date_trunc('month',ps.date_from)::date = date_trunc('month',pps1.date_from)::date and pps1.nti_unit = (SELECT parent_id FROM hr_department WHERE id = (select department_id from hr_employee where id = tp.employee_id)) and pps1.category = 'direct_cost'
 
                 ) AS FOO GROUP BY employee_id,employee_no,project_id,date,sap_project_code
 
