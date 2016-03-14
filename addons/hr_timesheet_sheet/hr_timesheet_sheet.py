@@ -117,8 +117,8 @@ class hr_timesheet_sheet(osv.osv):
             new_user_id = self.pool.get('hr.employee').browse(cr, uid, vals['employee_id'], context=context).user_id.id or False
             if not new_user_id:
                 raise osv.except_osv(_('Error!'), _('In order to create a timesheet for this employee, you must link him/her to a user.'))
-            if not self._sheet_date(cr, uid, ids, forced_user_id=new_user_id, context=context):
-                raise osv.except_osv(_('Error!'), _('You cannot have 2 timesheets that overlap!\nYou should use the menu \'My Timesheet\' to avoid this problem.'))
+            #if not self._sheet_date(cr, uid, ids, forced_user_id=new_user_id, context=context):
+            #    raise osv.except_osv(_('Error!'), _('You cannot have 2 timesheets that overlap!\nYou should use the menu \'My Timesheet\' to avoid this problem.'))
             if not self.pool.get('hr.employee').browse(cr, uid, vals['employee_id'], context=context).product_id:
                 raise osv.except_osv(_('Error!'), _('In order to create a timesheet for this employee, you must link the employee to a product.'))
             if not self.pool.get('hr.employee').browse(cr, uid, vals['employee_id'], context=context).journal_id:
@@ -127,6 +127,17 @@ class hr_timesheet_sheet(osv.osv):
             # If attendances, we sort them by date asc before writing them, to satisfy the alternance constraint
             # In addition to the date order, deleting attendances are done before inserting attendances
             vals['attendances_ids'] = self.sort_attendances(cr, uid, vals['attendances_ids'], context=context)
+
+        if vals.get('employee_no'):
+            employees = self.pool.get('hr.employee').search(cr, uid, [('employee_no', '=', vals['employee_no'])], context=context)
+            print employees
+            if len(employees) > 0:
+                vals['employee_id'] = employees[0]
+                print vals
+                employee = self.pool.get('hr.employee').browse(cr, uid, employees[0], context=context)
+                vals['department_id'] = employee.department_id.id
+                print vals
+
         res = super(hr_timesheet_sheet, self).write(cr, uid, ids, vals, context=context)
         if vals.get('attendances_ids'):
             for timesheet in self.browse(cr, uid, ids):

@@ -11,12 +11,12 @@
                     <!--field name="name" type="measure"/>
                     <field name="employee_id" type="measure"/>
                     <field name="employee_no" type="measure"/-->
-                    <field name="offshore_billed_mm" type="measure"/>
-                    <field name="offon_billed_mm" type="measure"/>
-                    <field name="total_billed_mm" type="measure"/>
                     <field name="total_offshore_mm" type="measure"/>
                     <field name="total_offon_mm" type="measure"/>
                     <field name="total_mm" type="measure"/>
+                    <field name="offshore_billed_mm" type="measure"/>
+                    <field name="offon_billed_mm" type="measure"/>
+                    <field name="total_billed_mm" type="measure"/>
                     <field name="offshore_billed_util" type="measure"/>
                     <field name="offon_billed_util" type="measure"/>
                     <field name="combined_billed_util" type="measure"/>
