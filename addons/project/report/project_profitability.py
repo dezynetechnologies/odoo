@@ -77,8 +77,9 @@ class project_profitability_report(osv.osv):
         (case when (select department_id from project_project where id = project_id) is null then (case when employee_id is null then null else (select department_id from hr_employee where id = BIG.employee_id) end) else (select department_id from project_project where id = project_id) end) as department_id,
 
         (case when employee_id is null then null else (select department_id from hr_employee where id = BIG.employee_id) end) as res_department_id,
+        (SELECT name from hr_department where id = (case when employee_id is null then null else (select department_id from hr_employee where id = BIG.employee_id) end)) as department_name,
 
-        (SELECT name from hr_department where id = (case when (select department_id from project_project where id = project_id) is null then (case when employee_id is null then null else (select department_id from hr_employee where id = BIG.employee_id) end) else (select department_id from project_project where id = project_id) end)) as department_name,
+
 (case when (select department_id from project_project where id = project_id) is null then (case when (select parent_id from hr_department where id = (select department_id from hr_employee where id = BIG.employee_id) ) is null then (select department_id from hr_employee where id = BIG.employee_id) else (select parent_id from hr_department where id = (select department_id from hr_employee where id = BIG.employee_id)) end )
   else (case when (select parent_id from hr_department where id = (select department_id from project_project where id = BIG.project_id) ) is null then (select department_id from project_project where id = BIG.project_id) else (select parent_id from hr_department where id = (select department_id from project_project where id = BIG.project_id) ) end )  end) as nti_unit,
 
