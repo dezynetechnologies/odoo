@@ -63,6 +63,8 @@ class project_profitability_report(osv.osv):
                 retv['gross_profit_perc'] = (retv['gross_profit_inr']/retv['revenue_inr'])*100
                 retv['oper_profit_perc'] = (retv['operating_profit_inr']/retv['revenue_inr'])*100
 
+            retv['gross_profit_inr'] = retv['revenue_inr'] - retv['direct_cost_inr']
+            retv['operating_profit_inr'] = retv['revenue_inr'] - retv['direct_cost_inr'] - retv['sga_inr']
         return ret_val
 
     def _select(self):
