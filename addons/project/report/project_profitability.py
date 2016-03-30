@@ -74,18 +74,13 @@ class project_profitability_report(osv.osv):
         BIG.employee_no as employee_no,
         BIG.project_id as project_id,
         BIG.sap_project_code as sap_project_code,
-
-
         (case when (select department_id from project_project where id = project_id) is null then (case when employee_id is null then null else (select department_id from hr_employee where id = BIG.employee_id) end) else (select department_id from project_project where id = project_id) end) as department_id,
-
         (case when employee_id is null then null else (select department_id from hr_employee where id = BIG.employee_id) end) as res_department_id,
         (SELECT name from hr_department where id = (case when employee_id is null then (select department_id from project_project where id = project_id) else (select department_id from hr_employee where id = BIG.employee_id) end)) as department_name,
 
 
-(case when (select department_id from project_project where id = project_id) is null then (case when (select parent_id from hr_department where id = (select department_id from hr_employee where id = BIG.employee_id) ) is null then (select department_id from hr_employee where id = BIG.employee_id) else (select parent_id from hr_department where id = (select department_id from hr_employee where id = BIG.employee_id)) end )
-  else (case when (select parent_id from hr_department where id = (select department_id from project_project where id = BIG.project_id) ) is null then (select department_id from project_project where id = BIG.project_id) else (select parent_id from hr_department where id = (select department_id from project_project where id = BIG.project_id) ) end )  end) as nti_unit,
-
-
+        (case when (select department_id from project_project where id = project_id) is null then (case when (select parent_id from hr_department where id = (select department_id from hr_employee where id = BIG.employee_id) ) is null then (select department_id from hr_employee where id = BIG.employee_id) else (select parent_id from hr_department where id = (select department_id from hr_employee where id = BIG.employee_id)) end )
+            else (case when (select parent_id from hr_department where id = (select department_id from project_project where id = BIG.project_id) ) is null then (select department_id from project_project where id = BIG.project_id) else (select parent_id from hr_department where id = (select department_id from project_project where id = BIG.project_id) ) end )  end) as nti_unit,
 
         SUM(revenue_inr) as revenue_inr,
         SUM(exp_cost + direct_cost_inr) as direct_cost_inr,
@@ -149,11 +144,11 @@ class project_profitability_report(osv.osv):
 
                 SELECT employee_id,project_id,sap_project_code,revenue_inr,geography,date_trunc('month',date_from)::date as date,
 
-                    (date_to - date_from + 1)/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))) as total_mm,
+                    ((date_to - date_from + 1)*allocation_perc)/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))*100) as total_mm,
 
-                    case when geography::text = 'offshore' then ( (date_to - date_from + 1)/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))) ) else 0::numeric end as total_offshore_mm,
+                    case when geography::text = 'offshore' then ( ((date_to - date_from + 1)*allocation_perc)/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))*100) ) else 0::numeric end as total_offshore_mm,
 
-                    case when geography::text = 'offon' then ( (date_to - date_from + 1)/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))) ) else 0::numeric end as total_offon_mm
+                    case when geography::text = 'offon' then ( ((date_to - date_from + 1)*allocation_perc)/(date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to))*100) ) else 0::numeric end as total_offon_mm
 
                 FROM hr_timesheet_sheet_sheet ) AS ss GROUP BY employee_id,date ) as tp on tp.employee_id=t.employee_id and tp.date=date_trunc('month',t.date_from)::date
 
