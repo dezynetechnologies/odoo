@@ -56,15 +56,15 @@ class project_profitability_report(osv.osv):
         ret_val =  super(project_profitability_report, self).read_group(cr, uid, domain, fields, groupby, offset, limit, context, orderby,lazy)
         for retv in ret_val:
             print retv
+            retv['gross_profit_inr'] = retv['revenue_inr'] - retv['direct_cost_inr']
+            retv['operating_profit_inr'] = retv['revenue_inr'] - retv['direct_cost_inr'] - retv['sga_inr']
             if retv['revenue_inr'] == 0:
-                retv['gross_profit_perc'] = retv['gross_profit_perc']
-                retv['oper_profit_perc']  = retv['oper_profit_perc']
+                retv['gross_profit_perc'] = 0
+                retv['oper_profit_perc']  = 0
             else:
                 retv['gross_profit_perc'] = (retv['gross_profit_inr']/retv['revenue_inr'])*100
                 retv['oper_profit_perc'] = (retv['operating_profit_inr']/retv['revenue_inr'])*100
 
-            retv['gross_profit_inr'] = retv['revenue_inr'] - retv['direct_cost_inr']
-            retv['operating_profit_inr'] = retv['revenue_inr'] - retv['direct_cost_inr'] - retv['sga_inr']
         return ret_val
 
     def _select(self):
