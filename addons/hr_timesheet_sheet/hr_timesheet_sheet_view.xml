@@ -91,7 +91,7 @@
                     <group>
                         <group string="Time Period">
                             <label for="date_from" string="Timesheet Period"/>
-                            <div><field name="date_from" class="oe_inline"/> to <field name="date_to" class="oe_inline"/></div>
+                            <div><field name="date_from" on_change="onchange_date_from(date_from)" class="oe_inline"/> to <field name="date_to" class="oe_inline"/></div>
                             <field name="name" invisible="1"/>
 
                             <field name="company_id" groups="base.group_multi_company"/>
@@ -123,6 +123,8 @@
                             <field name="currency_id"/>
 			                <field name="billing_perc"/>
                             <field name="revenue_inr"/>
+                            <field name="revenue_bill_curr"/>
+                            <field name="revenue_bill_curr_calc"/>
                         </group>
                     </group>
                     <!--notebook>
@@ -368,7 +370,7 @@
                     <field name="employee_id"/>
                     <field name="employee_no"/>
                     <field name="department_id" invisible="0"/>
-                    <field name="date_from"/>
+                    <field name="date_from" on_change="onchange_date_from(date_from)"/>
                     <field name="date_to"/>
                     <field name="project_id" on_change="onchange_project_id(project_id)"/>
                     <field name="sap_project_code" on_change="onchange_sap_project_code(sap_project_code)"/>
@@ -384,6 +386,9 @@
                     <field name="billing_perc"/>
                     <field name="geography"/>
                     <field name="revenue_inr"/>
+                    <field name="revenue_inr_calc"/>
+                    <field name="revenue_bill_curr"/>
+                    <field name="revenue_bill_curr_calc"/>
                     <field name="state"/>
                 </tree>
             </field>

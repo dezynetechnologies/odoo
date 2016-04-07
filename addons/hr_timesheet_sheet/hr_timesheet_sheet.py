@@ -22,6 +22,7 @@
 import time
 from datetime import datetime
 from datetime import date
+from calendar import monthrange
 from dateutil.relativedelta import relativedelta
 from pytz import timezone
 import pytz
@@ -108,6 +109,8 @@ class hr_timesheet_sheet(osv.osv):
             print projects
             if projects:
                 vals['project_id'] = projects[0]
+        #if vals[''] and vals[''] and vals[''] and vals['']:
+        #    vals['revenue_bill_curr_calc'] =
         new_id = super(hr_timesheet_sheet, self).create(cr, uid, vals, context=context)
         self.pool.get('project.project').write(cr, uid,[vals['project_id']],{'resource_allocations':[(4,new_id)]},context = context)
         return new_id
@@ -194,6 +197,46 @@ class hr_timesheet_sheet(osv.osv):
             for sheet_id in ids
         }
 
+    def calc_revenue_bill_curr(self, cr, uid, ids, field_name, arg, context=None):
+        res = {}
+        days = 30
+        date = False
+        for sheet in self.browse(cr, uid, ids, context=context):
+            print sheet
+            if sheet.allocation_perc and sheet.billing_perc and sheet.monthly_billing_rate and sheet.date_from and sheet.date_to :
+                date = datetime.strptime( sheet.date_from , '%Y-%m-%d')
+                year = date.year
+                month = date.month
+                (m,days) = monthrange(year,month)
+                if days < 30:
+                    days = 28
+                else:
+                    days = 30
+                res[sheet.id] = ((((datetime.strptime( sheet.date_to , '%Y-%m-%d') - datetime.strptime( sheet.date_from , '%Y-%m-%d')).days + 1)*float(sheet.allocation_perc) * float(sheet.billing_perc) )/(days*100*100))* float(sheet.monthly_billing_rate)
+                print res
+        return res
+
+
+    def calc_revenue_inr_curr(self, cr, uid, ids, field_name, arg, context=None):
+        res = {}
+        days = 30
+        date = False
+        for sheet in self.browse(cr, uid, ids, context=context):
+            print sheet
+            if sheet.allocation_perc and sheet.billing_perc and sheet.monthly_billing_rate and sheet.date_from and sheet.date_to :
+                date = datetime.strptime( sheet.date_from , '%Y-%m-%d')
+                year = date.year
+                month = date.month
+                (m,days) = monthrange(year,month)
+                if days < 30:
+                    days = 28
+                else:
+                    days = 30
+                res[sheet.id] = ((((datetime.strptime( sheet.date_to , '%Y-%m-%d') - datetime.strptime( sheet.date_from , '%Y-%m-%d')).days + 1)*float(sheet.allocation_perc) * float(sheet.billing_perc) )/(days*100*100))* float(sheet.monthly_billing_rate)*float(sheet.exchange_rate_on_closing)
+                print res
+        return res
+
+
     def _get_project_role_selection(self, cr, uid, context=None):
         """ Overriden in project_issue to offer more options """
         print uid
@@ -242,9 +285,9 @@ class hr_timesheet_sheet(osv.osv):
         'second_level': fields.char('Second Level Tracking'),
         'geography':fields.selection([('offon','offon'),('offshore','offshore')],'Geography'),
         'billed_status':fields.selection([('billed','billed'),('unbilled','unbilled'),('partially_billed','partially_billed')],'Billing Status'),
-        'billing_perc': fields.float('Billing',help="Billing percentage (0 to 100)"),
-        'allocation_perc': fields.float('Allocation',help="Allocation percentage (0 to 100) for the period"),
-        'monthly_billing_rate':fields.integer('Monthly Billing Rate',help="Monthly billing rate for the given employee and period.",required=True),
+        'billing_perc': fields.float('Billing',required=True,help="Billing percentage (0 to 100)"),
+        'allocation_perc': fields.float('Allocation',required=True,help="Allocation percentage (0 to 100) for the period"),
+        'monthly_billing_rate':fields.integer('Monthly Billing Rate',required=True,help="Monthly billing rate for the given employee and period."),
         'currency_id' : fields.many2one('res.currency', "Billing Currency", help="The currency the field is expressed in."),
         #'project_role' : fields.selection(_project_role_selection,'Project Role',required=True),
         'project_role' : fields.many2one('project.billing.rate','Project Role'),
@@ -253,11 +296,39 @@ class hr_timesheet_sheet(osv.osv):
         'opening_wip_inr' : fields.float('Opening WIP(INR)'),
         'closing_wip_bill_curr' : fields.float('Closing WIP(Billing Currency)'),
         'closing_wip_inr' : fields.float('Closing WIP(INR)'),
-        'exchange_rate_on_closing' : fields.float('Exchange Rate on Closing'),
+        'exchange_rate_on_closing' : fields.float('Exchange Rate on Closing',required=True),
         'revenue_bill_curr' : fields.float('Revenue(Billing Currency)'),
-        'revenue_inr' : fields.float('Revenue(INR)')
+        'revenue_bill_curr_calc': fields.function(calc_revenue_bill_curr, store=True, string='Revenue(Billing Currency(Calculated))', type='float',
+                                  help="This field is computed automatically and have the same value as revenue_bill_curr."),
+        'revenue_inr' : fields.float('Revenue(INR)'),
+        'revenue_inr_calc': fields.function(calc_revenue_inr_curr, store=True, string='Revenue(INR(Calculated))', type='float',
+                                  help="This field is computed automatically and is calculated based on the revenue is billing currency and an exchange rate input.")
         #'project_role' : fields.related('billing_rate_card_id', 'billing_table', type="one2many", relation="project.billing.rate", store=True, string="Project Role", required=True),
     }
+
+    #revenue_bill_curr_calc = f(date_from,date_to,billing_perc,allocation_perc,monthly_billing_rate)
+    def onchange_date_from(self,cr,uid,ids,date_from,context=None):
+        revenue_bill_curr = 0
+        days = 30
+        print "onchange_date_from() called"
+        for sheet in self.browse(cr, uid, ids, context=context):
+            print sheet
+            if sheet.date_from:
+                year = sheet.date_from.year
+                month = sheet.date_from.month
+                (m,days) = monthrange(year,month)
+
+                if days < 30:
+                    days = 28
+                else:
+                    days = 30
+            if sheet.allocation_perc and sheet.billing_perc and sheet.date_to and sheet.monthly_billing_rate:
+                print "DEBUG"
+                print sheet
+                revenue_bill_curr = (((sheet.date_to - date_from + 1)*sheet.allocation_perc * sheet.billing_perc )/days)* sheet.monthly_billing_rate
+
+        return {'value':{'revenue_bill_curr_calc': revenue_bill_curr}}
+
 
 
     def onchange_sap_project_code(self,cr,uid,ids,sap_project_code,context=None):
@@ -304,7 +375,8 @@ class hr_timesheet_sheet(osv.osv):
         'allocation_perc' : 100,
         'billing_perc':100,
         'geography' : 'offshore',
-        'billed_status' : 'billed'
+        'billed_status' : 'billed',
+        'exchange_rate_on_closing' : 0
     }
 
     def _sheet_date(self, cr, uid, ids, forced_user_id=False, context=None):
