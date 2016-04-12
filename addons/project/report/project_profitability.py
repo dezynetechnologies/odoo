@@ -164,7 +164,7 @@ class project_profitability_report(osv.osv):
                 project_id,
                 sap_project_code,
                 SUM(revenue_inr) as revenue_inr,
-                SUM(case when total_mm = 0 and total_offon_mm = 0 and total_offshore_mm = 0 then (onsite_allowance + offshore_salary) else (case when geography::text = 'offon' then (offon_mm/total_offon_mm)*onsite_allowance + (offon_mm/total_mm)*offshore_salary else (offshore_mm/total_mm)*offshore_salary end) end) as direct_cost_inr,
+                SUM(case when total_mm = 0 and total_offon_mm = 0 and total_offshore_mm = 0 then (onsite_allowance + offshore_salary) else (case when geography::text = 'offon' and total_offon_mm != 0 then (offon_mm/total_offon_mm)*onsite_allowance + (offon_mm/total_mm)*offshore_salary else (offshore_mm/total_mm)*offshore_salary end) end) as direct_cost_inr,
                 date,
                 SUM(case when total_mm = 0 then 0 else (case when geography::text = 'offon' then (offon_mm/total_mm)*sga_inr else (offshore_mm/total_mm)*sga_inr end) end) as sga_inr,
                 SUM(sga_inr) as sga_inr_tot,
