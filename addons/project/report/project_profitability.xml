@@ -21,10 +21,10 @@
                     <field name="total_offshore_mm" type="measure"/>
                     <field name="total_offon_mm" type="measure"/>
                     <field name="other_direct_cost_inr" type="measure"/>
-                    <field name="other_direct_cost_inr_tot" type="measure"/>
+                    <!--field name="other_direct_cost_inr_tot" type="measure"/-->
                     <field name="gross_profit_inr" type="measure"/>
                     <field name="sga_inr" type="measure"/>
-                    <field name="sga_inr_tot" type="measure"/>
+                    <!--field name="sga_inr_tot" type="measure"/-->
                     <field name="operating_profit_inr" type="measure"/>
                     <field name="gross_profit_perc" type="measure"/>
                     <field name="oper_profit_perc" type="measure"/>
