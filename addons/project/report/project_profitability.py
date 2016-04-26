@@ -56,6 +56,7 @@ class project_profitability_report(osv.osv):
         'total_offshore_mm': fields.float('Total Offshore mm',group_operator = 'avg'),
         'total_offon_mm' : fields.float('Total Offon mm',group_operator = 'avg'),
         'geography':fields.selection([('offon','offon'),('offshore','offshore')],'Geography'),
+        'expense_category':fields.char('Expense Category')
         }
     _order = 'sap_project_code asc'
 
@@ -109,7 +110,8 @@ class project_profitability_report(osv.osv):
         SUM(total_mm) as total_mm,
         SUM(total_offshore_mm) as total_offshore_mm,
         SUM(total_offon_mm) as total_offon_mm,
-        geography
+        geography,
+        expense_category
         """
         return select_str
 
@@ -132,7 +134,8 @@ class project_profitability_report(osv.osv):
                     SUM(total_mm) as total_mm,
                     SUM(total_offshore_mm) as total_offshore_mm,
                     SUM(total_offon_mm) as total_offon_mm,
-                    geography
+                    geography,
+                    expense_category
 
                 FROM (
                 SELECT employee_id, employee_no,project_id,sap_project_code,billable_cost as revenue_inr,exp_cost as direct_cost_inr,date, 0 as sga_inr,
@@ -145,7 +148,8 @@ class project_profitability_report(osv.osv):
                        0 as total_mm,
                        0 as total_offshore_mm,
                        0 as total_offon_mm,
-                       '' as geography
+                       '' as geography,
+                       'non-salary' as expense_category
 
                 FROM (
 
@@ -164,7 +168,7 @@ class project_profitability_report(osv.osv):
                 project_id,
                 sap_project_code,
                 SUM(revenue_inr) as revenue_inr,
-                SUM(case when total_mm = 0 and total_offon_mm = 0 and total_offshore_mm = 0 then (onsite_allowance + offshore_salary) else (case when geography::text = 'offon' and total_offon_mm != 0 then (offon_mm/total_offon_mm)*onsite_allowance + (offon_mm/total_mm)*offshore_salary else (offshore_mm/total_mm)*offshore_salary end) end) as direct_cost_inr,
+                SUM(case when total_mm = 0 and total_offon_mm = 0 then (onsite_allowance + offshore_salary) else (case when total_offon_mm = 0 and onsite_allowance != 0 then (offshore_mm/total_mm)*(offshore_salary+onsite_allowance) else  (case when geography::text = 'offon' and total_offon_mm != 0 then (offon_mm/total_offon_mm)*onsite_allowance + (offon_mm/total_mm)*offshore_salary else (offshore_mm/total_mm)*offshore_salary end) end) end) as direct_cost_inr,
                 date,
                 SUM(case when total_mm = 0 then 0 else (case when geography::text = 'offon' then (offon_mm/total_unit_mm)*sga_inr else (offshore_mm/total_unit_mm)*sga_inr end) end) as sga_inr,
                 SUM(sga_inr) as sga_inr_tot,
@@ -176,7 +180,8 @@ class project_profitability_report(osv.osv):
                 SUM(total_mm) as total_mm,
                 SUM(total_offshore_mm) as total_offshore_mm,
                 SUM(total_offon_mm) as total_offon_mm,
-                geography as geography
+                geography as geography,
+                'salary' as expense_category
 
 
 
@@ -246,7 +251,7 @@ class project_profitability_report(osv.osv):
 
                 )
 
-                ) AS BIGG GROUP BY employee_id,employee_no,project_id,date,sap_project_code,geography) AS BIG
+                ) AS BIGG GROUP BY employee_id,employee_no,project_id,date,sap_project_code,geography,expense_category) AS BIG
 
 
         """
@@ -262,7 +267,8 @@ class project_profitability_report(osv.osv):
                  res_department_id,
                  department_name,
                  BIG.sap_project_code,
-                 BIG.geography
+                 BIG.geography,
+                 BIG.expense_category
         """
         return group_by_str
 
