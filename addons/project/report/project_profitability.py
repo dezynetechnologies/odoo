@@ -148,7 +148,7 @@ class project_profitability_report(osv.osv):
                        0 as total_mm,
                        0 as total_offshore_mm,
                        0 as total_offon_mm,
-                       '' as geography,
+                       'offshore' as geography,
                        'non-salary' as expense_category
 
                 FROM (
