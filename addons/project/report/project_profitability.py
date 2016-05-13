@@ -85,14 +85,11 @@ class project_profitability_report(osv.osv):
         BIG.employee_no as employee_no,
         BIG.project_id as project_id,
         BIG.sap_project_code as sap_project_code,
-        (case when (select department_id from project_project where id = project_id) is null then (case when employee_id is null then null else (select department_id from hr_employee where id = BIG.employee_id) end) else (select department_id from project_project where id = project_id) end) as department_id,
-        (case when employee_id is null then null else (select department_id from hr_employee where id = BIG.employee_id) end) as res_department_id,
-        (SELECT name from hr_department where id = (case when employee_id is null then (select department_id from project_project where id = project_id) else (select department_id from hr_employee where id = BIG.employee_id) end)) as department_name,
-
-
-        (case when (select department_id from project_project where id = project_id) is null then (case when (select parent_id from hr_department where id = (select department_id from hr_employee where id = BIG.employee_id) ) is null then (select department_id from hr_employee where id = BIG.employee_id) else (select parent_id from hr_department where id = (select department_id from hr_employee where id = BIG.employee_id)) end )
+        (case when (select department_id from project_project where id = project_id) is null then (case when employee_id is null then null else (BIG.res_department_id) end) else (select department_id from project_project where id = project_id) end) as department_id,
+        BIG.res_department_id as res_department_id,
+        (SELECT name from hr_department where id = (case when employee_id is null then (select department_id from project_project where id = project_id) else (BIG.res_department_id) end)) as department_name,
+        (case when (select department_id from project_project where id = project_id) is null then (case when (select parent_id from hr_department where id = (BIG.res_department_id) ) is null then (BIG.res_department_id) else (select parent_id from hr_department where id = (BIG.res_department_id)) end )
             else (case when (select parent_id from hr_department where id = (select department_id from project_project where id = BIG.project_id) ) is null then (select department_id from project_project where id = BIG.project_id) else (select parent_id from hr_department where id = (select department_id from project_project where id = BIG.project_id) ) end )  end) as nti_unit,
-
         SUM(revenue_inr) as revenue_inr,
         SUM(direct_cost_inr) as direct_cost_inr,
         SUM(BIG.direct_cost_inr_tot) as direct_cost_inr_tot,
@@ -117,9 +114,10 @@ class project_profitability_report(osv.osv):
 
     def _from(self):
         from_str = """
-            (SELECT employee_id,
+                    (SELECT employee_id,
                     employee_no,
                     project_id,
+                    res_department_id,
                     sap_project_code,
                     SUM(revenue_inr) as revenue_inr,
                     SUM(direct_cost_inr) as direct_cost_inr,
@@ -138,7 +136,7 @@ class project_profitability_report(osv.osv):
                     expense_category
 
                 FROM (
-                SELECT employee_id, employee_no,project_id,sap_project_code,billable_cost as revenue_inr,exp_cost as direct_cost_inr,date, 0 as sga_inr,
+                SELECT employee_id, employee_no,project_id,res_department_id,sap_project_code,billable_cost as revenue_inr,exp_cost as direct_cost_inr,date, 0 as sga_inr,
                        0 as sga_inr_tot,
                        exp_cost as direct_cost_inr_tot,
                        0 as other_direct_cost_inr,
@@ -153,11 +151,11 @@ class project_profitability_report(osv.osv):
 
                 FROM (
 
-                SELECT null as employee_id,'' as employee_no,project_id,sap_project_code,exp_cost,billable_cost,date,category  from project_specific_expenses
+                SELECT null as employee_id,'' as employee_no,project_id,null as res_department_id,sap_project_code,exp_cost,billable_cost,date,category  from project_specific_expenses
 
                 UNION ALL
 
-                SELECT employee_id,employee_no,project_id,sap_project_code,exp_cost,billable_cost,date,category  from project_employee_expenses
+                SELECT employee_id,employee_no,project_id,res_department_id,sap_project_code,exp_cost,billable_cost,date,category  from project_employee_expenses
 
                 ) AS ASD
                 UNION ALL
@@ -166,6 +164,7 @@ class project_profitability_report(osv.osv):
                 employee_id,
                 employee_no,
                 project_id,
+		res_department_id,
                 sap_project_code,
                 SUM(revenue_inr) as revenue_inr,
                 SUM(case when total_offon_mm = 0 then
@@ -234,7 +233,7 @@ end) as direct_cost_inr,
                 (
                 SELECT
 
-                t.employee_id,t.employee_no,t.project_id,t.sap_project_code,t.revenue_inr,t.geography as geography,date_trunc('month',t.date_from)::date as date,
+                t.employee_id,t.employee_no,t.project_id,t.department_id as res_department_id,t.sap_project_code,t.revenue_inr,t.geography as geography,date_trunc('month',t.date_from)::date as date,
 
                     case when t.geography::text = 'offshore' then ( ((t.date_to - t.date_from + 1)*allocation_perc)/((case when date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) < 30 then 28::numeric else 30::numeric end)*100) ) else 0::numeric end as offshore_mm,
 
@@ -256,9 +255,9 @@ end) as direct_cost_inr,
                 SELECT employee_id,project_id,sap_project_code,revenue_inr,geography,date_trunc('month',date_from)::date as date,
 
                     ((date_to - date_from + 1)*allocation_perc)/((case when date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to)) < 30 then 28::numeric else 30::numeric end)*100) as total_mm,
-		            (case when (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = employee_id)) is null then (SELECT id FROM hr_department WHERE id= (select department_id from hr_employee where id = employee_id)) else (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = employee_id)) end) as nti_unit
+		            (case when (SELECT parent_id FROM hr_department WHERE id= (department_id)) is null then (SELECT id FROM hr_department WHERE id= (department_id)) else (SELECT parent_id FROM hr_department WHERE id= (department_id)) end) as nti_unit
 
-                FROM hr_timesheet_sheet_sheet ) AS ss GROUP BY nti_unit,date ) as tpp on tpp.nti_unit = (case when (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = t.employee_id)) is null then (SELECT id FROM hr_department WHERE id= (select department_id from hr_employee where id = t.employee_id)) else (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = t.employee_id)) end) and tpp.date=date_trunc('month',t.date_from)::date
+                FROM hr_timesheet_sheet_sheet ) AS ss GROUP BY nti_unit,date ) as tpp on tpp.nti_unit = (case when (SELECT parent_id FROM hr_department WHERE id= (t.department_id)) is null then (SELECT id FROM hr_department WHERE id= (t.department_id)) else (SELECT parent_id FROM hr_department WHERE id= (t.department_id)) end) and tpp.date=date_trunc('month',t.date_from)::date
 
                 left join
 
@@ -285,21 +284,19 @@ end) as direct_cost_inr,
 
 		left join
 
-		project_expenses as pps on date_trunc('month',t.date_from)::date = date_trunc('month',pps.date_from)::date and pps.nti_unit = (case when (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = t.employee_id)) is null then (SELECT id FROM hr_department WHERE id= (select department_id from hr_employee where id = t.employee_id)) else (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = t.employee_id)) end) and pps.category = 'sga'
+		project_expenses as pps on date_trunc('month',t.date_from)::date = date_trunc('month',pps.date_from)::date and pps.nti_unit = (case when (SELECT parent_id FROM hr_department WHERE id= (t.department_id)) is null then (SELECT id FROM hr_department WHERE id= (t.department_id)) else (SELECT parent_id FROM hr_department WHERE id= (t.department_id)) end) and pps.category = 'sga'
 
 		left join
 
-                project_expenses as pps1 on date_trunc('month',t.date_from)::date = date_trunc('month',pps1.date_from)::date and pps1.nti_unit = (case when (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = t.employee_id)) is null then (SELECT id FROM hr_department WHERE id= (select department_id from hr_employee where id = t.employee_id)) else (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = t.employee_id)) end) and pps1.category = 'direct_cost'
+                project_expenses as pps1 on date_trunc('month',t.date_from)::date = date_trunc('month',pps1.date_from)::date and pps1.nti_unit = (case when (SELECT parent_id FROM hr_department WHERE id= (t.department_id)) is null then (SELECT id FROM hr_department WHERE id= (t.department_id)) else (SELECT parent_id FROM hr_department WHERE id= (t.department_id)) end) and pps1.category = 'direct_cost'
 
 
 
-                ) AS FOO GROUP BY employee_id,employee_no,project_id,date,sap_project_code,geography
+                ) AS FOO GROUP BY employee_id,employee_no,project_id,res_department_id,date,sap_project_code,geography
 
                 )
 
-                ) AS BIGG GROUP BY employee_id,employee_no,project_id,date,sap_project_code,geography,expense_category) AS BIG
-
-
+                ) AS BIGG GROUP BY employee_id,employee_no,project_id,res_department_id,date,sap_project_code,geography,expense_category) AS BIG
         """
         return from_str
 

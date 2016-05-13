@@ -104,6 +104,7 @@ class project_employee_expenses(osv.osv):
 	    'project_id': fields.many2one('project.project', 'Project', help="Project to be accounted for this expense."),
 	    'employee_id' : fields.many2one('hr.employee','Employee',help="Employee over whom this expense has been incurred."),
         'employee_no': fields.related('employee_id', 'employee_no', type="char", store=True, string="Employee No", required=True, readonly=False),
+        'res_department_id' :fields.many2one('hr.department', 'Resource Department'),
         'category':fields.selection([('travel_cost','Travel Cost'),('other_cost','Other Cost')],string="Expense Type"),
         'date': fields.date('Date', required=True, select=1, readonly=False),
         'exp_cost':fields.integer('Actual Cost'),
@@ -128,6 +129,10 @@ class project_employee_expenses(osv.osv):
             print employees
             if len(employees) > 0:
                 vals['employee_id'] = employees[0]
+                employee = self.pool.get('hr.employee').browse(cr, uid, employees[0], context=context)
+                vals['res_department_id'] = employee.department_id.id
+                print vals
+
         projects = []
         if vals['sap_project_code']:
             projects = self.pool.get('project.project').search(cr, uid, [('sap_project_code', '=', vals['sap_project_code'])], context=context)
@@ -136,6 +141,25 @@ class project_employee_expenses(osv.osv):
                 vals['project_id'] = projects[0]
 
         return super(project_employee_expenses, self).create(cr, uid, vals, context=context)
+
+    def write(self, cr, uid, ids, vals, context=None):
+        print 'Calling write function'
+        if vals.get('employee_no'):
+            employees = self.pool.get('hr.employee').search(cr, uid, [('employee_no', '=', vals['employee_no'])], context=context)
+            print employees
+            if len(employees) > 0:
+                vals['employee_id'] = employees[0]
+                print vals
+                employee = self.pool.get('hr.employee').browse(cr, uid, employees[0], context=context)
+                vals['res_department_id'] = employee.department_id.id
+                print vals
+                res = super(project_employee_expenses, self).write(cr, uid, ids, vals, context=context)
+                print res
+                print 'return after write'
+                return res
+            return
+        else :
+            return
 
 
 class project_specific_expenses(osv.osv):

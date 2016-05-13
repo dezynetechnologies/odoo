@@ -943,6 +943,7 @@
                         <field name="employee_id"/>
                         <field name="employee_no"/>
                         <field name="project_id"/>
+                        <field name="res_department_id"/>
                         <field name="category"/>
                         <field name="date"/>
                         <field name="exp_cost"/>
