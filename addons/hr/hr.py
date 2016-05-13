@@ -303,13 +303,18 @@ class hr_employee(osv.osv):
         departments = []
         employees = []
         employee = False
+        if data['department_code']:
+            departments = self.pool.get('hr.department').search(cr, uid, [('department_code', '=', data['department_code'])], context=context)
+            if departments:
+                data['department_id'] = departments[0]
+
         if data['employee_no']:
             employees = self.pool.get('hr.employee').search(cr, uid, [('employee_no', '=', data['employee_no'])], context=context)
             print employees
             if len(employees) > 0:
                 print "Employee with same employee no. found"
                 #Ignore this entry else system raises an error
-                return
+                return super(hr_employee, self).write(cr, uid, employees , data , context=context)
                 #if data.has_key('id') == False:
                 #    employee = employees[0]
                 #
@@ -317,10 +322,7 @@ class hr_employee(osv.osv):
                 #    #print employee.id
                 #   data['id'] = employee
 
-        if data['department_code']:
-            departments = self.pool.get('hr.department').search(cr, uid, [('department_code', '=', data['department_code'])], context=context)
-            if departments:
-                data['department_id'] = departments[0]
+
 
         if data['work_email']:
             users = self.pool.get('res.users').search(cr, uid, [('login', '=', data['work_email'])], context=context)

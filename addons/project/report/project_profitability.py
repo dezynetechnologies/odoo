@@ -63,12 +63,12 @@ class project_profitability_report(osv.osv):
     def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False,lazy=True):
         if context is None:
             context = {}
-        print "read_group() called"
+        #print "read_group() called"
         ret_val =  super(project_profitability_report, self).read_group(cr, uid, domain, fields, groupby, offset, limit, context, orderby,lazy)
         for retv in ret_val:
-            print retv
-            retv['gross_profit_inr'] = retv['revenue_inr'] - retv['direct_cost_inr'] - retv['other_direct_cost_inr']
-            retv['operating_profit_inr'] = retv['revenue_inr'] - retv['direct_cost_inr']- retv['other_direct_cost_inr'] - retv['sga_inr']
+            #print retv
+            #retv['gross_profit_inr'] = retv['revenue_inr'] - retv['direct_cost_inr'] - retv['other_direct_cost_inr']
+            #retv['operating_profit_inr'] = retv['revenue_inr'] - retv['direct_cost_inr']- retv['other_direct_cost_inr'] - retv['sga_inr']
             if retv['revenue_inr'] == 0:
                 retv['gross_profit_perc'] = 0
                 retv['oper_profit_perc']  = 0
@@ -168,7 +168,54 @@ class project_profitability_report(osv.osv):
                 project_id,
                 sap_project_code,
                 SUM(revenue_inr) as revenue_inr,
-                SUM(case when total_mm = 0 and total_offon_mm = 0 then (onsite_allowance + offshore_salary) else (case when total_offon_mm = 0 and onsite_allowance != 0 then (offshore_mm/total_mm)*(offshore_salary+onsite_allowance) else  (case when geography::text = 'offon' and total_offon_mm != 0 then (offon_mm/total_offon_mm)*onsite_allowance + (offon_mm/total_mm)*offshore_salary else (offshore_mm/total_mm)*offshore_salary end) end) end) as direct_cost_inr,
+                SUM(case when total_offon_mm = 0 then
+	(case when total_offshore_mm = 0 then
+		(case when geography::text = 'offon' then
+			case when total_offshore_entries = 0 then
+			(onsite_allowance + offshore_salary)/total_offon_entries
+			else
+			(onsite_allowance)/total_offon_entries
+			end
+		else
+			case when total_offon_entries = 0 then
+			(offshore_salary + onsite_allowance)/total_offshore_entries
+			else
+			(offshore_salary)/total_offshore_entries
+			end
+		end)
+	else
+		(case when geography::text = 'offon' then
+			(onsite_allowance)/total_offon_entries
+		else
+			case when total_offon_entries = 0 then
+			((offshore_salary+onsite_allowance)*offshore_mm)/total_mm
+			else
+			(offshore_salary*offshore_mm)/total_mm
+			end
+		end)
+
+	end)
+else
+	(case when total_offshore_mm = 0 then
+		(case when geography::text = 'offon' then
+			case when total_offshore_entries = 0 then
+			((onsite_allowance + offshore_salary)*offon_mm)/total_offon_mm
+			else
+			(offon_mm/total_offon_mm)*onsite_allowance + (offon_mm/total_mm)*offshore_salary
+			end
+		else
+			0::numeric
+		end)
+	else
+		(case when geography::text = 'offon' then
+			(offon_mm/total_offon_mm)*onsite_allowance + (offon_mm/total_mm)*offshore_salary
+		else
+			(offshore_mm/total_mm)*offshore_salary
+		end)
+
+	end)
+
+end) as direct_cost_inr,
                 date,
                 SUM(case when total_mm = 0 then 0 else (case when geography::text = 'offon' then (offon_mm/total_unit_mm)*sga_inr else (offshore_mm/total_unit_mm)*sga_inr end) end) as sga_inr,
                 SUM(sga_inr) as sga_inr_tot,
@@ -182,10 +229,6 @@ class project_profitability_report(osv.osv):
                 SUM(total_offon_mm) as total_offon_mm,
                 geography as geography,
                 'salary' as expense_category
-
-
-
-
                 FROM
 
                 (
@@ -197,7 +240,7 @@ class project_profitability_report(osv.osv):
 
                     case when t.geography::text = 'offon' then ( ((t.date_to - t.date_from + 1)*allocation_perc)/((case when date_part('days',date_trunc('month',t.date_to) + '1 month'::interval - date_trunc('month',t.date_to)) < 30 then 28::numeric else 30::numeric end)*100) ) else 0::numeric end as offon_mm,
 
-                total_unit_mm,total_mm,total_offshore_mm,total_offon_mm, ps.offshore_salary, ps.onsite_allowance,pps.amount as sga_inr,pps1.amount as direct_cost_inr
+                total_unit_mm,total_mm,total_offshore_mm,total_offon_mm,total_offon_entries,total_offshore_entries, ps.offshore_salary, ps.onsite_allowance,pps.amount as sga_inr,pps1.amount as direct_cost_inr
 
                 FROM
 
@@ -213,17 +256,20 @@ class project_profitability_report(osv.osv):
                 SELECT employee_id,project_id,sap_project_code,revenue_inr,geography,date_trunc('month',date_from)::date as date,
 
                     ((date_to - date_from + 1)*allocation_perc)/((case when date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to)) < 30 then 28::numeric else 30::numeric end)*100) as total_mm,
-		     (case when (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = employee_id)) is null then (SELECT id FROM hr_department WHERE id= (select department_id from hr_employee where id = employee_id)) else (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = employee_id)) end) as nti_unit
+		            (case when (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = employee_id)) is null then (SELECT id FROM hr_department WHERE id= (select department_id from hr_employee where id = employee_id)) else (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = employee_id)) end) as nti_unit
 
                 FROM hr_timesheet_sheet_sheet ) AS ss GROUP BY nti_unit,date ) as tpp on tpp.nti_unit = (case when (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = t.employee_id)) is null then (SELECT id FROM hr_department WHERE id= (select department_id from hr_employee where id = t.employee_id)) else (SELECT parent_id FROM hr_department WHERE id= (select department_id from hr_employee where id = t.employee_id)) end) and tpp.date=date_trunc('month',t.date_from)::date
 
                 left join
 
-                (SELECT employee_id,SUM(total_offshore_mm) as total_offshore_mm,SUM(total_offon_mm) as total_offon_mm,SUM(total_mm) as total_mm,date FROM
+                (SELECT employee_id,SUM(total_offshore_mm) as total_offshore_mm,SUM(total_offon_mm) as total_offon_mm,SUM(total_mm) as total_mm,date, SUM(total_offshore_entries) as total_offshore_entries, SUM(total_offon_entries) as total_offon_entries FROM
 
                 (
 
                 SELECT employee_id,project_id,sap_project_code,revenue_inr,geography,date_trunc('month',date_from)::date as date,
+
+                	(case when geography::text = 'offshore' then 1::numeric else 0::numeric end) as total_offshore_entries,
+		            (case when geography::text = 'offon' then 1::numeric else 0::numeric end) as total_offon_entries,
 
                     ((date_to - date_from + 1)*allocation_perc)/((case when date_part('days',date_trunc('month',date_to) + '1 month'::interval - date_trunc('month',date_to)) < 30 then 28::numeric else 30::numeric end)*100) as total_mm,
 
