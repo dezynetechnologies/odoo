@@ -14,12 +14,12 @@
                     <field name="profit" type="measure"/-->
                     <field name="revenue_inr" type="measure"/>
                     <field name="direct_cost_inr" type="measure"/>
-                    <field name="direct_cost_inr_tot" type="measure"/>
+                    <!--field name="direct_cost_inr_tot" type="measure"/>
                     <field name="offshore_mm" type="measure"/>
                     <field name="offon_mm" type="measure"/>
                     <field name="total_mm" type="measure"/>
                     <field name="total_offshore_mm" type="measure"/>
-                    <field name="total_offon_mm" type="measure"/>
+                    <field name="total_offon_mm" type="measure"/-->
                     <field name="other_direct_cost_inr" type="measure"/>
                     <!--field name="other_direct_cost_inr_tot" type="measure"/-->
                     <field name="gross_profit_inr" type="measure"/>
